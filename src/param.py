@@ -10,7 +10,7 @@ case_N200_k400 = {
     'nu'            : 0.3,              # Poisson's ratio
     'zeta'          : 0.1,                # weight of dislocation core energy
     'a_dsc'         : 1,
-    'mode_list'     : [[0,2.5],[1,-1]],          # np.array([p_m, q_m])
+    'mode_list'     : [[0,-1]],          # np.array([p_m, q_m])
     'gamma'         : 0.03,
     # external condition
     'temperature'   : 24,#0.0006,            # reduced temperature

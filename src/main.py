@@ -28,12 +28,9 @@ path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_l
 import neighborlist
 nblist_mat, nblist_arr = neighborlist.generate_neighbor_index_mat(latt_dim)
 
-# initialize lattice state
+# initialize lattice state and lattice height
 import initialization
-latt_state = initialization.one_state_init(latt_dim)
-
-# initialize lattice height
-latt_height = initialization.one_state_init(latt_dim)
+latt_state, latt_height = initialization.one_state_init(latt_dim)
 
 # read in stress kernel Xi
 from file_handling import read_stress_kernel_from_txt

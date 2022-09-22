@@ -39,4 +39,5 @@ def sbatch_job(T):
 
 if __name__ == '__main__':
     T = np.arange(0., 4, 0.4)[1:]
+    T = np.arange(0., 0.2, 0.02)[1:]
     sbatch_job(T)
