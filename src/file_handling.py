@@ -38,6 +38,7 @@ def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step, wu, wz, path_
     with open(f'{path_state}/E_total_wu.txt', 'a') as f:
         f.write(f"{i} {E_total:>10.8f} {E_core:>10.8f} {E_elas:>10.8f} {E_step:>10.8f} {wu:>10.8f} {wz:>10.8f}\n")
 
+
 def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext):
     mode_name = ''
     for i in range(len(mode_list)):
@@ -53,6 +54,7 @@ def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temp
     path_state = scratch_path + f'N{num_points}_k{kpoints_max}/nu{nu}_zt{zeta}_adsc{a_dsc}_gm{gamma}/{mode_name}/T{temperature:.2f}_tau{tau_ext}'
     if os.path.exists(path_state)==False:
         os.makedirs(path_state)
+        print(f'working dir = {path_state}')
     return path_state
 
 

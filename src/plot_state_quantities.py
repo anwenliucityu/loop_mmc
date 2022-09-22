@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from file_handling import output_path
 from param import case_N200_k400 as case
 
+equlibrium_num = 100
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.top'] = True
@@ -69,7 +70,7 @@ fig,ax = plt.subplots(2,3, figsize=(15,10))
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
-    dat = np.loadtxt(path_state+'/E_total_wu.txt')[:]
+    dat = np.loadtxt(path_state+'/E_total_wu.txt')[equlibrium_num:]
     step = dat[:,0]
     E = dat[:,1]
     E_core = dat[:,2]
@@ -107,8 +108,8 @@ for i in range(2):
         ax[i][j].xaxis.major.formatter._useMathText = True
         ax[i][j].ticklabel_format(style='sci', scilimits=(-1,2), axis='both')
         ax[i][j].tick_params(labelsize=labelsize-2)
-        ax[i][j].xaxis.get_offset_text().set_fontsize(labelsize-3)
-        ax[i][j].yaxis.get_offset_text().set_fontsize(labelsize-3)
+        ax[i][j].xaxis.get_offset_text().set_fontsize(labelsize-1)
+        ax[i][j].yaxis.get_offset_text().set_fontsize(labelsize-1)
 
 ax[0][0].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][1].set_xlabel(r'$T$', fontsize=labelsize)
@@ -118,13 +119,13 @@ ax[0][1].set_ylabel(r'<$w_u$>', fontsize=labelsize)
 ax[0][2].set_ylabel(r'<$w_z$>', fontsize=labelsize)
 
 ax[0][1].plot(T, np.array(W_list), 'o-',)
-ax[0][0].plot(T, np.array(C_list), '^-',label=r'$C_\mathrm{tot}$')
+ax[0][0].plot(T, np.array(C_list), 'o-',label=r'$C_\mathrm{tot}$', markersize=7, markerfacecolor='none', mew=2)
 ax[0][0].plot(T, np.array(C_core), '>-',label=r'$C_\mathrm{core}$')
 ax[0][0].plot(T, np.array(C_elas), 's-',label=r'$C_\mathrm{elas}$')
 ax[0][0].plot(T, np.array(C_step), '<-',label=r'$C_\mathrm{step}$')
 ax[0][2].plot(T, np.array(Z_list), 'o-')
 ax[0][0].legend(fancybox=False)
-ax[1][1].legend()
+ax[1][1].legend(fancybox=False)
 
 plt.tight_layout()
 plt.show()
