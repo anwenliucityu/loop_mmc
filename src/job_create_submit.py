@@ -31,11 +31,12 @@ def sbatch_job(T):
     for i in range(T.shape[0]):
         path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
         write_file(T[i], path_state)
+        path = os.getcwd()
         os.chdir(path_state)
         os.system(f'sbatch job.sh')
+        os.chdir(path)
 
 
 if __name__ == '__main__':
-    T = np.arange(0., 4, 0.2)[1:]
-    T = np.array([100])
+    T = np.arange(0., 4, 0.4)[1:]
     sbatch_job(T)

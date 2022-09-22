@@ -42,14 +42,11 @@ def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step, wu, wz, path_
 def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext):
     mode_name = ''
     for i in range(len(mode_list)):
-        for j in range(2):
-            if j==0:
-                mode_name+='s'
-            if j==1:
-                mode_name+='z'
+        for j, string in enumerate(['b','h']):
+            mode_name += string
             mode_name += str(mode_list[i][j])
-            if i!=len(mode_list)-1:
-                mode_name+='_'
+        if i!=len(mode_list)-1:
+            mode_name+='_'
     scratch_path = '/gauss12/home/cityu/anwenliu/scratch/loop_mc/'
     path_state = scratch_path + f'N{num_points}_k{kpoints_max}/nu{nu}_zt{zeta}_adsc{a_dsc}_gm{gamma}/{mode_name}/T{temperature:.2f}_tau{tau_ext}'
     if os.path.exists(path_state)==False:
