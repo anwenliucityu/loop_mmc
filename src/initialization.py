@@ -25,8 +25,8 @@ def circle_init(latt_dim):
 
 def read_state(start_point, path_state):
     restart_path = path_state + '/snapshoti/'
-    latt_state_file = restart_path + f'{s_{start_point}.txt}'
-    latt_height_file = restart_path + f'{z_{start_point}.txt}'
+    latt_state_file = restart_path + f's_{start_point}.txt'
+    latt_height_file = restart_path + f'z_{start_point}.txt'
     latt_state = np.loadtxt(latt_state_file)
     latt_height = np.loadtxt(latt_height_file)
     state_size = latt_state.shape
@@ -38,8 +38,7 @@ def grow_config_size(start_points, path_state, latt_dim):
     grow_latt_state  = np.zeros(shape = latt_dim)
     grow_latt_height = np.zeros(shape = latt_dim)
     for i, start_point in enumerate(start_points):
-
-
+        True
 
 
 if __name__ == '__main__':
