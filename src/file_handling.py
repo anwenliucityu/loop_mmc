@@ -53,7 +53,6 @@ def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temp
     path_state = scratch_path + f'N{num_points}_k{kpoints_max}/nu{nu}_zt{zeta}_adsc{a_dsc}_gm{gamma}/{mode_name}/T{temperature:.2f}_tau{tau_ext}'
     if os.path.exists(path_state)==False:
         os.makedirs(path_state)
-    print(f'working direction = ', path_state)
     return path_state
 
 
