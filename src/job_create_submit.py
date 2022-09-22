@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from param import case
 from file_handling import output_path
 tau_ext = case['tau_ext']
@@ -23,15 +24,18 @@ def write_file(T, path):
                   f'#SBATCH --nodes=1\n'
                   f'#SBATCH --cpus-per-task=1\n\n'
 
-                  f'cd /gauss12/home/cityu/anwenliu/loop_stress/mmc_final \n'
+                  f'cd {os.getcwd()} \n'
                   f'python main.py {T:.2f} \n')
 
-if __name__ == '__main__':
-    import numpy as np
-    T = np.arange(0., 4, 0.2)[1:]
-    #T = np.array([1])
+def sbatch_job(T):
     for i in range(T.shape[0]):
         path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
         write_file(T[i], path_state)
         os.chdir(path_state)
         os.system(f'sbatch job.sh')
+
+
+if __name__ == '__main__':
+    T = np.arange(0., 4, 0.2)[1:]
+    T = np.array([100])
+    sbatch_job(T)

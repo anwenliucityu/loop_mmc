@@ -75,6 +75,7 @@ latt_dim = (num_points, num_points)
 T = np.arange(0,2,0.2)[1:]
 T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
 T = np.arange(0,0.2,0.02)[1:]
+T = np.arange(0,4,0.2)[1:]
 
 C_list = []
 C_core = []
@@ -89,7 +90,7 @@ fig,ax = plt.subplots(2,3, figsize=(15,10))
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
-    dat = np.loadtxt(path_state+'E_total_wu.txt')[2000:]
+    dat = np.loadtxt(path_state+'/E_total_wu.txt')[:]
     step = dat[:,0]
     E = dat[:,1]
     E_core = dat[:,2]
@@ -110,9 +111,9 @@ for i in range(T.shape[0]):
     W_list.append(W)
     Z = np.mean(z)
     Z_list.append(Z)
-    ax[1][0].plot(step, E, 'o', label=f'{round(T[i],2)}')
-    ax[1][1].plot(step, u, 'o', label=f'{round(T[i],2)}')
-    ax[1][2].plot(step, z, 'o-', label=f'{round(T[i],2)}')
+    ax[1][0].plot(step, E, '-', label=f'{round(T[i],2)}')
+    ax[1][1].plot(step, u, '-', label=f'{round(T[i],2)}')
+    ax[1][2].plot(step, z, '-', label=f'{round(T[i],2)}')
 
 ax[1][0].set_xlabel('step', fontsize=labelsize)
 ax[1][0].set_ylabel(r'$E_\mathrm{tot}$', fontsize=labelsize)
