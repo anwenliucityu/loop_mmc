@@ -15,33 +15,12 @@ import matplotlib.pyplot as plt
 from file_handling import output_path
 from param import case_N200_k400 as case
 
-
+mpl.rcParams['xtick.direction'] = 'in'
+mpl.rcParams['ytick.direction'] = 'in'
+mpl.rcParams['xtick.top'] = True
+mpl.rcParams['ytick.right'] = True
+mpl.rc('axes', linewidth=1.)
 def c():
-    mpl.rcParams['font.sans-serif'] = ['DejaVu Sans']
-    #plt.rcParams["font.family"] = "sans-serif"
-    mpl.rcParams['xtick.direction'] = 'in'
-    mpl.rcParams['ytick.direction'] = 'in'
-    mpl.rcParams['xtick.top'] = True
-    mpl.rcParams['ytick.right'] = True
-    mpl.rcParams['grid.color'] = 'k'
-    mpl.rcParams['grid.linestyle'] = 'dashed'
-    mpl.rcParams['grid.linewidth'] = 0.5
-    mpl.rcParams['grid.alpha'] = 0.25
-    # set tick width
-    mpl.rcParams['xtick.major.size'] = 6
-    mpl.rcParams['xtick.major.width'] = 1
-    mpl.rcParams['xtick.minor.size'] = 4
-    mpl.rcParams['xtick.minor.width'] = 0.5
-    mpl.rcParams['ytick.major.size'] = 6
-    mpl.rcParams['ytick.major.width'] = 1
-    mpl.rcParams['ytick.minor.size'] = 4
-    mpl.rcParams['ytick.minor.width'] = 0.5
-    matplotlib.rcParams['figure.subplot.left'] = 0.14
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.13
-    matplotlib.rcParams['figure.subplot.right'] = 0.97
-    matplotlib.rcParams['figure.subplot.top'] = 0.9
-    # mpl.rcParams['mathtext.default'] = 'regular'
-    # mpl.rc('mathtext', fontset='custom')
     size=20
     #mpl.rc('mathtext', fontset='stixsans')
     mpl.rc('axes', linewidth=1.25)
@@ -83,7 +62,7 @@ C_elas = []
 C_step = []
 W_list = []
 Z_list = []
-labelsize=15
+labelsize=17
 titlesize=18
 #T = np.array([0.00015])
 fig,ax = plt.subplots(2,3, figsize=(15,10))
@@ -137,19 +116,16 @@ ax[0][2].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][0].set_ylabel(r'$C$', fontsize=labelsize)
 ax[0][1].set_ylabel(r'<$w_u$>', fontsize=labelsize)
 ax[0][2].set_ylabel(r'<$w_z$>', fontsize=labelsize)
-ax[0][0].set_title('Heat capacity', fontsize=titlesize)
 
 ax[0][1].plot(T, np.array(W_list), 'o-',)
-ax[0][0].plot(T, np.array(C_list), '^-',label=r'T=$C_\mathrm{tot}$')
-ax[0][0].plot(T, np.array(C_core), '>-',label=r'T=$C_\mathrm{core}$')
-ax[0][0].plot(T, np.array(C_elas), 's-',label=r'T=$C_\mathrm{elas}$')
-ax[0][0].plot(T, np.array(C_step), '<-',label=r'T=$C_\mathrm{step}$')
+ax[0][0].plot(T, np.array(C_list), '^-',label=r'$C_\mathrm{tot}$')
+ax[0][0].plot(T, np.array(C_core), '>-',label=r'$C_\mathrm{core}$')
+ax[0][0].plot(T, np.array(C_elas), 's-',label=r'$C_\mathrm{elas}$')
+ax[0][0].plot(T, np.array(C_step), '<-',label=r'$C_\mathrm{step}$')
 ax[0][2].plot(T, np.array(Z_list), 'o-')
 ax[0][0].legend(fancybox=False)
-
-
-
-#plt.plot(0,0)
 ax[1][1].legend()
+
+plt.tight_layout()
 plt.show()
 
