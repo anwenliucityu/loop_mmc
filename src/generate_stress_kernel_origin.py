@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from param import case_N200_k400 as case
+from param import case
 nu = case['nu']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
@@ -82,4 +82,6 @@ ax.set_title(rf"$\Xi_{{I,J;0,0}}$ for $N = {num_points}$, $k_{{\rm max}} = {kpoi
 ax.set_aspect('equal', adjustable='box')
 fig.set_size_inches(6,5)
 plt.tight_layout()
-plt.show()
+plt.savefig(path_stress_kernel +'/plot.png')
+plt.close()
+#plt.show()

@@ -20,7 +20,7 @@ def write_file(T, path):
                   f'#SBATCH --ntasks-per-core=1\n'
                   f'#SBATCH --ntasks=1\n'
                   f'#SBATCH --mem=2G \n'
-                  f'#SBATCH --exclude=gauss[6,16],gauss'
+                  f'#SBATCH --exclude=gauss[6,16],gauss\n'
                   f'#SBATCH --nodes=1\n'
                   f'#SBATCH --cpus-per-task=1\n\n'
 
@@ -38,7 +38,7 @@ def sbatch_job(T):
 
 
 if __name__ == '__main__':
-    T = np.arange(0., 4, 0.2)[1:]
+    T = np.arange(0., 2, 0.2)[1:]
     #T = np.arange(0., 0.2, 0.02)[1:]
     #T = np.arange(4, 8, 0.4)
     sbatch_job(T)

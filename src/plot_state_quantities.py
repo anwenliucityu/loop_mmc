@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from file_handling import output_path
 from param import case_N200_k400 as case
 
-equlibrium_num = 0
+equlibrium_num = 3000
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.top'] = True
@@ -53,8 +53,8 @@ latt_dim = (num_points, num_points)
 T = np.arange(0,2,0.2)[1:]
 T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
 T = np.arange(0,0.2,0.02)[1:] #[[0,-1]]
-T = np.arange(0,4,0.4)[1:]  # [[0,2.5],[1,-1]]
-T = np.arange(0,4,0.2)[1:]  #[[1,0]]  and [[1,-1]]
+#T = np.arange(0,4,0.4)[1:]  # [[0,2.5],[1,-1]]
+#T = np.arange(0,4,0.2)[1:]  #[[1,0]]  and [[1,-1]]
 
 C_list = []
 C_core = []
