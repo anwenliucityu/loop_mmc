@@ -29,7 +29,7 @@ def write_file(T, path):
 
 def sbatch_job(T):
     for i in range(T.shape[0]):
-        path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
+        path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, mkdir=True)
         write_file(T[i], path_state)
         path = os.getcwd()
         os.chdir(path_state)
@@ -38,6 +38,7 @@ def sbatch_job(T):
 
 
 if __name__ == '__main__':
-    T = np.arange(0., 4, 0.4)[1:]
-    T = np.arange(0., 0.2, 0.02)[1:]
+    T = np.arange(0., 4, 0.2)[1:]
+    #T = np.arange(0., 0.2, 0.02)[1:]
+    #T = np.arange(4, 8, 0.4)
     sbatch_job(T)
