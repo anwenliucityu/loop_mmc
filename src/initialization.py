@@ -77,6 +77,6 @@ def compute_energy(latt_state, latt_height, latt_stress, nblist_mat, a_dsc, nu, 
 
 
 if __name__ == '__main__':
-    #latt_dim = (3,3)
-    #a = one_state_init(latt_dim)
-    #print(a)
+    latt_dim = (3,3)
+    a = one_state_init(latt_dim)
+    print(a)
