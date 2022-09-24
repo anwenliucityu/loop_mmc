@@ -27,13 +27,12 @@ def circle_init(latt_dim):
     return latt_state
 
 def read_state(start_point, path_state):
-    restart_path = path_state + '/snapshot/'
-    latt_state_file = restart_path + f's_{start_point}.txt'
-    latt_height_file = restart_path + f'z_{start_point}.txt'
+    latt_state_file = path_state + f'/s_{start_point}.txt'
+    latt_height_file = path_state + f'/z_{start_point}.txt'
     latt_state = np.loadtxt(latt_state_file)
     latt_height = np.loadtxt(latt_height_file)
-    state_size = latt_state.shape
-    return latt_state, latt_height, state_size
+    size = latt_state.shape
+    return latt_state, latt_height, size
 
 def grow_config_size(start_points, path_state, latt_dim):
     '''repeat a 200*200 config into a 800*800 config by random rotation'''
@@ -49,7 +48,7 @@ def grow_config_size(start_points, path_state, latt_dim):
         latt_state, latt_height, size = read_state(start_point, path_state)
         grow_latt_state[i*size[0]:(i+1)*size[0], j*size[1]:(j+1)*size[1]] = latt_state
         grow_latt_height[i*size[0]:(i+1)*size[0], j*size[1]:(j+1)*size[1]] = latt_height
-    return grow_latt_state, grow_latt_height, size
+    return grow_latt_state, grow_latt_height
 
 def get_boundary_region_index(initial_dim, repeat=4, relax_wdith=2):
     relax_region = (relax_wdith/2, initial_dim[0]-relax_wdith/2)

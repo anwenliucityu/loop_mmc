@@ -19,6 +19,7 @@ recalc_stress_step = case['recalc_stress_step']
 plot_state_step = case['plot_state_step']
 path_stress_kernel = case['path_stress_kernel']
 dump_interval = case['dump_interval']
+read_restart =  case['read_restart']
 
 # create a directory for saving the states generated during simulation
 path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, mkdir=True)
@@ -29,14 +30,15 @@ nblist_mat, nblist_arr = neighborlist.generate_neighbor_index_mat(latt_dim)
 
 # initialize lattice state and lattice height
 import initialization
-latt_state, latt_height = initialization.one_state_init(latt_dim)
-
-'''
+if read_restart == False:
+    latt_state, latt_height = initialization.one_state_init(latt_dim)
 # read restart file
-startint_points = [100000000,2000000000]
-latt_state, latt_height, initial_size = initialization.grow_config_size(start_points, path_state, latt_dim)
-boundary_index = initialization.get_boundary_region_index(initial_dim, repeat=4, relax_wdith=2)
-'''
+else:
+    start_points = case['start_points']
+    initial_dim  = case['initial_dim']
+    initial_config_path = output_path(initial_dim[0], kpoints_max, nu,zeta,a_dsc, gamma, mode_list, temperature, tau_ext)
+    latt_state, latt_height = initialization.grow_config_size(start_points, initial_config_path, latt_dim)
+    boundary_index = initialization.get_boundary_region_index(initial_dim, repeat=4, relax_wdith=2)
 
 # read in stress kernel Xi
 from file_handling import read_stress_kernel_from_txt
