@@ -34,12 +34,14 @@ def read_state(start_point, path_state):
     size = latt_state.shape
     return latt_state, latt_height, size
 
-def grow_config_size(start_points, path_state, latt_dim):
+def grow_config_size(start_points, path_state, latt_dim, initial_dim):
     '''repeat a 200*200 config into a 800*800 config by random rotation'''
-    if len(start_points) != 16:
-        start_points_new = (start_points*int(np.ceil(16/len(start_points))))[:16]
+    dim0repeat = int(latt_dim[0]/initial_dim[0]); dim1repeat = int(latt_dim[1]/initial_dim[1])
+    replica_num = dim0repeat * dim1repeat
+    if len(start_points) != replica_num:
+        start_points_new = (start_points*int(np.ceil(replica_num/len(start_points))))[:16]
     random.shuffle(start_points_new)
-    start_points_new = np.array(start_points_new).reshape(4,4)
+    start_points_new = np.array(start_points_new).reshape(dim0repeat,dim1repeat)
     latt_state_list  = []
     latt_height_list = []
     grow_latt_state  = np.zeros(shape = latt_dim)

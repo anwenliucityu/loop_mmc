@@ -10,7 +10,7 @@ case_N200_k400 = {
     'nu'            : 0.3,              # Poisson's ratio
     'zeta'          : 0.1,                # weight of dislocation core energy
     'a_dsc'         : 1,
-    'mode_list'     : [[0,-1]],          # np.array([p_m, q_m])  T = 0.05
+    'mode_list'     : [[1,-1]],          # np.array([p_m, q_m])  T = 0.05
     #'mode_list'     : [[0,2.5],[1,-1]],   #
     'mode_list'     : [[1,-1]],
     #'mode_list'     : [[1,0]],
@@ -52,7 +52,7 @@ case_N800_k400 = {
     # read restart 
     'read_restart' : True,
     'initial_dim'  : (200,200),
-    'start_points' : [200000000,400000000],
+    'start_points' : [200000000],
 }
 
 case_N400_k400 = {
@@ -78,8 +78,10 @@ case_N400_k400 = {
     'path_stress_kernel' : './stress_kernel_origin', # directory for saving stress kernel file
     'plot_lim'     :2.5,
     'read_restart' : True,
+    'initial_dim'  : (200,200),
+    'start_points' : [200000000],
 }
 
 
 
-case = case_N800_k400
+case = case_N200_k400

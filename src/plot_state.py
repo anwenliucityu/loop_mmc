@@ -43,5 +43,5 @@ def plot_state_stress(latt_height, latt_state, latt_stress, tau_ext, step, path_
         plot_path = f'{path_state}/snapshot'
         if os.path.exists(plot_path)==False:
             os.makedirs(plot_path)
-        #plt.savefig(plot_path + f"/state_{step}.jpg")
+        plt.savefig(plot_path + f"/state_{step}.jpg")
     plt.close()

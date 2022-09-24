@@ -37,8 +37,8 @@ else:
     start_points = case['start_points']
     initial_dim  = case['initial_dim']
     initial_config_path = output_path(initial_dim[0], kpoints_max, nu,zeta,a_dsc, gamma, mode_list, temperature, tau_ext)
-    latt_state, latt_height = initialization.grow_config_size(start_points, initial_config_path, latt_dim)
-    boundary_index = initialization.get_boundary_region_index(initial_dim, repeat=4, relax_wdith=2)
+    latt_state, latt_height = initialization.grow_config_size(start_points, initial_config_path, latt_dim, initial_dim)
+    boundary_index = initialization.get_boundary_region_index(initial_dim, repeat=int(latt_dim[0]/initial_dim[0]),relax_wdith=8)
 
 # read in stress kernel Xi
 from file_handling import read_stress_kernel_from_txt
