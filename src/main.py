@@ -40,6 +40,7 @@ else:
     latt_state, latt_height = initialization.grow_config_size(start_points, initial_config_path, latt_dim, initial_dim)
     boundary_index = initialization.get_boundary_region_index(initial_dim, repeat=int(latt_dim[0]/initial_dim[0]),relax_wdith=8)
 
+print(latt_state.shape)
 # read in stress kernel Xi
 from file_handling import read_stress_kernel_from_txt
 stress_kernel = read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel)

@@ -15,22 +15,29 @@ def mmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     N = latt_state.shape[0]
     choice_num = len(mode_list)
     stress_kernel_center = stress_kernel_shift(stress_kernel, (int(np.ceil(N/2-1)), int(np.ceil(N/2-1))))
-    write_step = N*N
+    write_step = 2000 #N*N
     
     # create a txt file for writing E_total and w_u
-    open(f'{path_state}/E_total_wu.txt','w')
+    open(f'{path_state}/quantities.txt','w')
     for i in range(maxiter+1):
-        # calc wz and wu
-        w_u = np.sqrt(np.mean(latt_state**2)-np.mean(latt_state)**2)
-        w_z = np.sqrt(np.mean(latt_height**2)-np.mean(latt_height)**2)
-
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
             plot_state_stress(latt_height, latt_state, latt_stress, tau_ext, i, path_state)
 
         # write E_total
         if np.mod(i, write_step) == 0:
-            write_total_energy_wu_to_txt(i, E_total,E_core,E_elas,E_step, w_u, w_z, path_state)
+            # calc wz and wu
+            #w_u = np.sqrt(np.mean(latt_state**2)-np.mean(latt_state)**2)
+            #w_z = np.sqrt(np.mean(latt_height**2)-np.mean(latt_height)**2)
+            s_mean = np.mean(latt_state)
+            s_square_mean = np.mean(latt_state**2)
+            h_mean = np.mean(latt_height)
+            h_square_mean = np.mean(latt_height**2)
+            w_u = np.sqrt(s_square_mean - s_mean**2)
+            w_z = np.sqrt(h_square_mean - h_mean**2)
+            stress_mean = np.mean(latt_stress)
+            write_total_energy_wu_to_txt(i, E_total,E_core,E_elas,E_step, w_u, w_z,\
+                    s_mean, s_square_mean, h_mean, h_square_mean, stress_mean, path_state)
 
         # write state
         if np.mod(i, dump_interval) == 0 and i != 0:
