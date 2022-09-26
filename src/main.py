@@ -17,6 +17,7 @@ latt_dim = (num_points, num_points)
 maxiter = case['maxiter']
 recalc_stress_step = case['recalc_stress_step']
 plot_state_step = case['plot_state_step']
+write_step = case['write_step']
 path_stress_kernel = case['path_stress_kernel']
 dump_interval = case['dump_interval']
 read_restart =  case['read_restart']
@@ -56,4 +57,4 @@ E_total, E_core, E_elas, E_step = \
 
 # metropolis monte carlo
 from monte_carlo_simulator import mmc
-latt_state, latt_stress = mmc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, path_state)
+latt_state, latt_stress = mmc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, write_step, path_state)

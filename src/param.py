@@ -24,6 +24,8 @@ case_N200_k400 = {
     'plot_state_step' : 2000000,          # plot state every this number of steps
     'dump_interval'   : 2e8,
     'path_stress_kernel' : './stress_kernel_origin', # directory for saving stress kernel file
+    'write_step'   : 2000, 
+    # read restart
     'read_restart' : False,
     'start_points' : [400000000],
     'initial_dim'  : (200,200),
@@ -107,6 +109,7 @@ case_N100_k400 = {
     'dump_interval'   : 1e8,
     'path_stress_kernel' : './stress_kernel_origin', # directory for saving stress kernel file
     'plot_lim'     :2.5,
+    'write_step'   : 10000,
     'read_restart' : False,
 }
 

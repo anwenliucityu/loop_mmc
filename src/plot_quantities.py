@@ -16,7 +16,7 @@ from file_handling import output_path
 from param import case
 from analysis import calc_correlation, calc_inverse_viscosity
 
-equlibrium_num = 50
+equlibrium_num = 400
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.top'] = True
@@ -50,6 +50,7 @@ mode_list = case['mode_list']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
 latt_dim = (num_points, num_points)
+write_step = case['write_step']
 
 T = np.arange(0,2,0.2)[1:]
 T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
@@ -118,11 +119,11 @@ for i in range(T.shape[0]):
     ax[1][4].plot(step, h_square_mean, '-')
 
     # calculate v-v correlation
-    v = (np.diff(s_mean[1:], n=1) + np.diff(s_mean[:-1], n=1))/2
-    h = (np.diff(h_mean[1:], n=1) + np.diff(h_mean[:-1], n=1))/2
-    tau_array_v , correlation_v = calc_correlation(v, T[i], num_points)
+    v = a_dsc*(np.diff(s_mean[1:], n=1) + np.diff(s_mean[:-1], n=1))/2
+    h = a_dsc*(np.diff(h_mean[1:], n=1) + np.diff(h_mean[:-1], n=1))/2
+    tau_array_v , correlation_v = calc_correlation(v, write_step)
     ax[0][5].plot(tau_array_v, correlation_v, 'o-')
-    tau_array_h , correlation_h = calc_correlation(h, T[i], num_points)
+    tau_array_h , correlation_h = calc_correlation(h, write_step)
     ax[1][5].plot(tau_array_h, correlation_h, 'o-')
 
     integrate_vs = calc_inverse_viscosity(tau_array_v, correlation_v, T[i], num_points)
@@ -131,25 +132,25 @@ for i in range(T.shape[0]):
     mobility.append(integrate_vz)
 
 ax[0,5].set_xlabel(r'$\Delta$step', fontsize=labelsize)
-ax[0,5].set_ylabel(r'$v_\mathrm{cor}$', fontsize=labelsize)
+ax[0,5].set_ylabel(r'$\mathrm{cor}_v$', fontsize=labelsize)
 ax[1,5].set_xlabel(r'$\Delta$step', fontsize=labelsize)
-ax[1,5].set_ylabel(r'$h_\mathrm{cor}$', fontsize=labelsize)
+ax[1,5].set_ylabel(r'$\mathrm{cor}_h$', fontsize=labelsize)
 
 ax[1][0].set_xlabel('step', fontsize=labelsize)
 ax[1][0].set_ylabel(r'$E_\mathrm{tot}$ per pixel', fontsize=labelsize)
 ax[0][2].set_xlabel('step', fontsize=labelsize)
-ax[0][2].set_ylabel(r'$w_u$', fontsize=labelsize)
+ax[0][2].set_ylabel(r'$w_s$', fontsize=labelsize)
 ax[1][2].set_xlabel('step', fontsize=labelsize)
 ax[1][2].set_ylabel(r'$w_z$', fontsize=labelsize)
 
 ax[0][3].set_xlabel('step', fontsize=labelsize)
-ax[0][3].set_ylabel(r'<$s$>', fontsize=labelsize)
+ax[0][3].set_ylabel(r'$\overline{s}$', fontsize=labelsize)
 ax[1][3].set_xlabel('step', fontsize=labelsize)
-ax[1][3].set_ylabel(r'<$h$>', fontsize=labelsize)
+ax[1][3].set_ylabel(r'$\overline{h}$', fontsize=labelsize)
 ax[0][4].set_xlabel('step', fontsize=labelsize)
-ax[0][4].set_ylabel(r'<$s^2$>', fontsize=labelsize)
+ax[0][4].set_ylabel(r'$\overline{s^2}$', fontsize=labelsize)
 ax[1][4].set_xlabel('step', fontsize=labelsize)
-ax[1][4].set_ylabel(r'<$h^2$>', fontsize=labelsize)
+ax[1][4].set_ylabel(r'$\overline{h^2}$', fontsize=labelsize)
 
 for i in range(figsize_x):
     for j in range(figsize_y):
@@ -164,7 +165,7 @@ ax[0][0].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][1].set_xlabel(r'$T$', fontsize=labelsize)
 ax[1][1].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][0].set_ylabel(r'$C$', fontsize=labelsize)
-ax[0][1].set_ylabel(r'<$w_u$>', fontsize=labelsize)
+ax[0][1].set_ylabel(r'<$w_s$>', fontsize=labelsize)
 ax[1][1].set_ylabel(r'<$w_z$>', fontsize=labelsize)
 
 ax[0][1].plot(T, np.array(W_list), 'o-',)
@@ -184,9 +185,9 @@ ax[0][6].set_ylabel(r'$F$ per pixel', fontsize=labelsize)
 
 ax[1,6].plot(T, inverse_viscosity, 'o-', label = r'inverse_viscosity')
 ax[1,6].plot(T, mobility, 'o-', label = r'mobility')
-ax[1,6].set_ylabel(r'$d/\eta$')
-ax[1,6].set_xlabel(r'$T$')
-ax[1,6].legend()
+ax[1,6].set_ylabel(r'$d/\eta$', fontsize = labelsize)
+ax[1,6].set_xlabel(r'$T$', fontsize = labelsize)
+ax[1,6].legend(fancybox=False)
 
 #ax[1,7].plot(1/T, np.log(inverse_viscosity), 'o-')
 #ax[1,7].plot(1/T, np.log(mobility), 'o-')

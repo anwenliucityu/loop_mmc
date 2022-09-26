@@ -1,28 +1,27 @@
 import numpy as np
 import scipy
 
-def calc_correlation(quantity, T, num_points):
-    dump_interval = num_points**2
+def calc_correlation(quantity, write_step):
     N = quantity.shape[0]
-    tau_array = np.arange(0,10,1)
+    delta_step_index_array = np.arange(0,10,1)
     correlation = []
-    for tau in tau_array:
+    for index in delta_step_index_array:
         count = 0
-        integral = 0
+        ave = 0
         for i in range(N-1):
-            t0 = i
-            t_tau = i+tau
-            if t_tau>N-2:
+            step_0 = i
+            step_delta_step = i+index
+            if step_delta_step>N-2:
                 break
-            v0 = quantity[t0]
-            v_tau = quantity[t_tau]
-            integral += v0 * v_tau 
+            v_0 = quantity[step_0]
+            v_delta_step = quantity[step_delta_step]
+            ave += v_0 * v_delta_step
             count +=1
-        #integral = integral/count/T * 2 * num_points**2
-        correlation.append(integral)
-    return tau_array*dump_interval, correlation
+        ave /= count
+        correlation.append(ave)
+    return delta_step_index_array*write_step, correlation
 
 def calc_inverse_viscosity(tau_array, correlation, T, num_points):
-    integrate = scipy.integrate.trapezoid(correlation, x=tau_array)*num_points**2/T
+    integrate = 2*scipy.integrate.trapezoid(correlation, x=tau_array)*num_points**2/T
     return integrate
 
