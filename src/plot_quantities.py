@@ -51,6 +51,7 @@ num_points = case['num_points']
 kpoints_max = case['kpoints_max']
 latt_dim = (num_points, num_points)
 write_step = case['write_step']
+delta_t = (2*len(mode_list)*num_points**2)**(-1)
 
 T = np.arange(0,2,0.2)[1:]
 T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
@@ -119,11 +120,11 @@ for i in range(T.shape[0]):
     ax[1][4].plot(step, h_square_mean, '-')
 
     # calculate v-v correlation
-    v = a_dsc*(np.diff(s_mean[1:], n=1) + np.diff(s_mean[:-1], n=1))/2
-    h = a_dsc*(np.diff(h_mean[1:], n=1) + np.diff(h_mean[:-1], n=1))/2
-    tau_array_v , correlation_v = calc_correlation(v, write_step)
+    v = a_dsc*(np.diff(s_mean[1:], n=1) + np.diff(s_mean[:-1], n=1))/(2*delta_t*write_step)
+    h = a_dsc*(np.diff(h_mean[1:], n=1) + np.diff(h_mean[:-1], n=1))/(2*delta_t*write_step)
+    tau_array_v , correlation_v = calc_correlation(v, write_step, delta_t)
     ax[0][5].plot(tau_array_v, correlation_v, 'o-')
-    tau_array_h , correlation_h = calc_correlation(h, write_step)
+    tau_array_h , correlation_h = calc_correlation(h, write_step, delta_t)
     ax[1][5].plot(tau_array_h, correlation_h, 'o-')
 
     integrate_vs = calc_inverse_viscosity(tau_array_v, correlation_v, T[i], num_points)
