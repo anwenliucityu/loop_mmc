@@ -70,7 +70,7 @@ plt.rc('text', usetex=True)
 plt.rc('font', **fontProperties)
 
 fig, ax = plt.subplots()
-ax.pcolor(stress_kernel, vmin=-plot_lim, vmax=plot_lim, cmap='rainbow', shading='auto', edgecolor='k', linewidth=0.2)
+ax.pcolor(stress_kernel.T, vmin=-plot_lim, vmax=plot_lim, cmap='rainbow', shading='auto', edgecolor='k', linewidth=0.2)
 ax.set_xlim(0, num_points)
 ax.set_ylim(0, num_points)
 ax.set_xticks(np.linspace(0, num_points, 11, endpoint=True))

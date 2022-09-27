@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-num_points = 800
+num_points = 50
 kpoints_max = 400
 stress_kernel_name = f'stress_kernel_origin_N{num_points}_k{kpoints_max}.txt'
 stress_kernel = np.loadtxt(stress_kernel_name)
@@ -17,7 +17,7 @@ plt.rc('text', usetex=True)
 plt.rc('font', **fontProperties)
 
 fig, ax = plt.subplots()
-ax.pcolor(stress_kernel, vmin=-plot_lim, vmax=plot_lim, cmap='rainbow', shading='auto',    edgecolor='k', linewidth=0.2)
+ax.pcolor(stress_kernel.T, vmin=-plot_lim, vmax=plot_lim, cmap='rainbow', shading='auto',    edgecolor='k', linewidth=0.2)
 ax.set_xlim(0, num_points)
 ax.set_ylim(0, num_points)
 ax.set_xticks(np.linspace(0, num_points, 11, endpoint=True))

@@ -16,7 +16,10 @@ from file_handling import output_path
 from param import case
 from analysis import calc_correlation, calc_inverse_viscosity
 
-equlibrium_num = 400
+equlibrium_num_E = 100
+
+
+
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.top'] = True
@@ -51,6 +54,7 @@ num_points = case['num_points']
 kpoints_max = case['kpoints_max']
 latt_dim = (num_points, num_points)
 write_step = case['write_step']
+equlibrium_num_sz = int(np.ceil(num_points**2/write_step))*equlibrium_num_E
 delta_t = (2*len(mode_list)*num_points**2)**(-1)
 
 T = np.arange(0,2,0.2)[1:]
@@ -80,19 +84,21 @@ mobility = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
-    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num:]
-    #dat = np.loadtxt(path_state+'/E_total_wu.txt')[equlibrium_num:]
+    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:]
     step = dat[:,0]
     E = dat[:,1]
     E_core = dat[:,2]
     E_elas = dat[:,3]
     E_step = dat[:,4]
-    u = dat[:,5]
-    z = dat[:,6]
-    s_mean = dat[:,7]
-    h_mean = dat[:,9]
-    s_square_mean = dat[:,8]
-    h_square_mean = dat[:,10]
+
+    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_sz:]
+    sz_step = sz_dat[:,0]
+    s_mean  = sz_dat[:,1]
+    s_square_mean = sz_dat[:,2]
+    h_mean  = sz_dat[:,3]
+    h_square_mean = sz_dat[:,4]
+    u =  np.sqrt(s_square_mean - s_mean**2)
+    z = np.sqrt(h_square_mean - h_mean**2)
 
     C = (np.mean(E**2)-np.mean(E)**2)/(num_points**2*T[i]**2)
     if i==0:
@@ -112,12 +118,12 @@ for i in range(T.shape[0]):
     Z = np.mean(z)
     Z_list.append(Z)
     ax[1][0].plot(step, E/num_points**2, '-', label=f'{round(T[i],2)}')
-    ax[0][2].plot(step, u, '-', label=f'{round(T[i],2)}')
-    ax[1][2].plot(step, z, '-', label=f'{round(T[i],2)}')
-    ax[0][3].plot(step, s_mean, '-')
-    ax[1][3].plot(step, h_mean, '-')
-    ax[0][4].plot(step, s_square_mean, '-')
-    ax[1][4].plot(step, h_square_mean, '-')
+    ax[0][2].plot(sz_step, u, '-', label=f'{round(T[i],2)}')
+    ax[1][2].plot(sz_step, z, '-', label=f'{round(T[i],2)}')
+    ax[0][3].plot(sz_step, s_mean, '-')
+    ax[1][3].plot(sz_step, h_mean, '-')
+    ax[0][4].plot(sz_step, s_square_mean, '-')
+    ax[1][4].plot(sz_step, h_square_mean, '-')
 
     # calculate v-v correlation
     v = a_dsc*(np.diff(s_mean[1:], n=1) + np.diff(s_mean[:-1], n=1))/(2*delta_t*write_step)

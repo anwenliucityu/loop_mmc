@@ -38,7 +38,7 @@ def sbatch_job(T):
 
 
 if __name__ == '__main__':
-    T = np.arange(0., 2, 0.2)[1:]
+    T = np.arange(0., 2.2, 0.2)[1:]
     #T = np.arange(0, 0.08, 0.01)[1:]
     #T = np.array([0.01,0.03])
     #T = np.array([0.2])

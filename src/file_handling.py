@@ -34,11 +34,13 @@ def read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel):
     f"/stress_kernel_origin_N{num_points}_k{kpoints_max}.txt", 'r') as file:
         return np.array([[float(num) for num in line.split(' ')] for line in file])
 
-def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step, wu, wz, \
-        s_mean, s_square_mean, h_mean, h_square_mean, stress_mean, path_state):
+def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step, stress_mean, path_state):
     with open(f'{path_state}/quantities.txt', 'a') as f:
-        f.write(f"{i} {E_total:>6.4f} {E_core:>6.4f} {E_elas:>6.4f} {E_step:>6.4f} {wu:>6.4f} {wz:>6.4f} {s_mean:>6.4} {s_square_mean:>6.4} {h_mean:>6.4} {h_square_mean:>6.4} {stress_mean:>6.4}\n")
+        f.write(f"{i} {E_total:>6.4f} {E_core:>6.4f} {E_elas:>6.4f} {E_step:>6.4f} {stress_mean:>6.4}\n")
 
+def write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, path_state):
+    with open(f'{path_state}/s_z.txt', 'a') as f:
+        f.write(f"{i} {s_mean:>6.4} {s_square_mean: >6.4} {h_mean:>6.4} {h_square_mean:>6.4} \n")
 
 def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, mkdir=False):
     mode_name = ''
