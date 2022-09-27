@@ -7,6 +7,7 @@ from compute_fields import compute_stress_field
 from plot_state import plot_state_stress
 from file_handling import write_total_energy_wu_to_txt, write_s_z_average_to_txt
 from pathlib import Path
+import os
 
 def mmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, write_step, path_state=None):
     '''metropolis monte carlo'''
@@ -19,6 +20,8 @@ def mmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     stress_kernel_center = stress_kernel_shift(stress_kernel, (int(np.ceil(N/2-1)), int(np.ceil(N/2-1))))
     
     # create a txt file for writing E_total and w_u
+    os.system(f'rm {path_state}/quantities.txt')
+    os.system(f'rm {path_state}/s_z.txt')
     Path(f'{path_state}/quantities.txt').touch()
     Path(f'{path_state}/s_z.txt').touch()
     

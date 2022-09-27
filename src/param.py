@@ -167,5 +167,4 @@ case_N10_k400 = {
     'read_restart' : False,
 }
 
-
 case = case_N50_k400
