@@ -17,7 +17,6 @@ latt_dim = (num_points, num_points)
 maxiter = case['maxiter']
 recalc_stress_step = case['recalc_stress_step']
 plot_state_step = case['plot_state_step']
-write_step = case['write_step']
 path_stress_kernel = case['path_stress_kernel']
 dump_interval = case['dump_interval']
 read_restart =  case['read_restart']
@@ -41,7 +40,6 @@ else:
     latt_state, latt_height = initialization.grow_config_size(start_points, initial_config_path, latt_dim, initial_dim)
     boundary_index = initialization.get_boundary_region_index(initial_dim, repeat=int(latt_dim[0]/initial_dim[0]),relax_wdith=8)
 
-print(latt_state.shape)
 # read in stress kernel Xi
 from file_handling import read_stress_kernel_from_txt
 stress_kernel = read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel)
@@ -57,4 +55,4 @@ E_total, E_core, E_elas, E_step = \
 
 # metropolis monte carlo
 from monte_carlo_simulator import mmc
-latt_state, latt_stress = mmc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, write_step, path_state)
+latt_state, latt_stress = mmc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, path_state)

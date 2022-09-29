@@ -1,9 +1,9 @@
 import numpy as np
 import scipy
 
-def calc_correlation(quantity, write_step, delta_t):
+def calc_correlation(quantity, write_step, delta_t, a_dsc):
     N = quantity.shape[0]
-    delta_step_index_array = np.arange(0,10,1)
+    delta_step_index_array = np.arange(0,6,1)
     correlation = []
     for index in delta_step_index_array:
         count = 0
@@ -17,7 +17,7 @@ def calc_correlation(quantity, write_step, delta_t):
             v_delta_step = quantity[step_delta_step]
             ave += v_0 * v_delta_step
             count +=1
-        ave /= count
+        ave *= a_dsc**2/(count*(2*write_step*delta_t)**2)
         correlation.append(ave)
     return delta_step_index_array*write_step*delta_t, correlation
 

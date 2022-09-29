@@ -9,7 +9,7 @@ from file_handling import write_total_energy_wu_to_txt, write_s_z_average_to_txt
 from pathlib import Path
 import os
 
-def mmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, write_step, path_state=None):
+def mmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, path_state=None):
     '''metropolis monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -32,14 +32,11 @@ def mmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
 
         # write E_total
         if np.mod(i, write_energy) == 0:
-            # calc wz and wu
-            #w_u = np.sqrt(s_square_mean - s_mean**2)
-            #w_z = np.sqrt(h_square_mean - h_mean**2)
             stress_mean = np.mean(latt_stress)
             write_total_energy_wu_to_txt(i, E_total,E_core,E_elas,E_step, stress_mean, path_state)
 
         # write s and z average and square average
-        if np.mod(i, write_step) == 0:
+        #if np.mod(i, write_energy) == 0:
             s_mean = np.mean(latt_state)
             s_square_mean = np.mean(latt_state**2)
             h_mean = np.mean(latt_height)
