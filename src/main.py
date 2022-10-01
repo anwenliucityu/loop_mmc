@@ -5,6 +5,7 @@ import sys
 from param import case
 
 temperature = float(sys.argv[1])
+simulation_type = case['simulation_type']
 tau_ext = case['tau_ext']
 nu = case['nu']
 zeta = case['zeta']
@@ -22,7 +23,7 @@ dump_interval = case['dump_interval']
 read_restart =  case['read_restart']
 
 # create a directory for saving the states generated during simulation
-path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, mkdir=True)
+path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, simulation_type, mkdir=True)
 
 # build up neighborlist
 import neighborlist
@@ -53,6 +54,12 @@ latt_stress = compute_stress_field(latt_state, tau_ext, stress_kernel_center, a_
 E_total, E_core, E_elas, E_step = \
         initialization.compute_energy(latt_state,latt_height,latt_stress,nblist_mat,a_dsc,nu,zeta,gamma)
 
-# metropolis monte carlo
-from monte_carlo_simulator import mmc
-latt_state, latt_stress = mmc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, path_state)
+# monte carlo
+if simulation_type == 'mmc' or simulation_type == 'gmc':
+    from monte_carlo_simulator import mc
+    mc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, simulation_type, path_state)
+elif simulation_type == 'kmc':
+    from monte_carlo_simulator import kmc
+    v = case['v']
+    Q = case['Q']
+    latt_state, latt_stress = kmc(latt_state,latt_stress,latt_height,stress_kernel,a_dsc,gamma,nblist_mat,nblist_arr, temperature,tau_ext,maxiter,nu,zeta,recalc_stress_step,plot_state_step,mode_list,E_total,E_core,E_elas,E_step,dump_interval,v,Q,path_state)

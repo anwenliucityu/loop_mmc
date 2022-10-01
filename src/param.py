@@ -1,8 +1,10 @@
 '''parameters for calculation'''
 import numpy as np
-
+simulations = ['mmc', 'gmc', 'kmc']
 
 case_N200_k400 = {
+    # select simulation type
+    'simulation_type': simulations[0],
     # numerical parameter
     'num_points'    : 200,              # number of points along two axes
     'kpoints_max'   : 400,              # maximum k in truncated summation
@@ -87,6 +89,7 @@ case_N400_k400 = {
 }
 
 case_N100_k400 = {
+    'simulation_type': simulations[0],
     # numerical parameter
     'num_points'    : 100,              # number of points along two axes
     'kpoints_max'   : 400,              # maximum k in truncated summation
@@ -94,6 +97,8 @@ case_N100_k400 = {
     'nu'            : 0.3,              # Poisson's ratio
     'zeta'          : 0.1,                # weight of dislocation core energy
     'a_dsc'         : 1,
+    'v'             : 1, 
+    'Q'             : 1,
     #'mode_list'     : [[0,-1]],          # np.array([p_m, q_m])  T = 0.05
     #'mode_list'     : [[0,2.5],[1,-1]],   #
     'mode_list'     : [[1,-1]],
@@ -101,7 +106,7 @@ case_N100_k400 = {
     'gamma'         : 0.03,
     # external condition
     'temperature'   : 24,#0.0006,            # reduced temperature
-    'tau_ext'       : 10,#3.2,                # externally applied reduced stress
+    'tau_ext'       : 0.01,#3.2,                # externally applied reduced stress
     # simulation parameters
     'maxiter'       : 10000000000,         # max number of iteration steps
     'recalc_stress_step' : 10000000,     # recalculate stress field every this number of steps

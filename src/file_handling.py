@@ -42,7 +42,7 @@ def write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, pa
     with open(f'{path_state}/s_z.txt', 'a') as f:
         f.write(f"{i} {s_mean:>6.4} {s_square_mean: >6.4} {h_mean:>6.4} {h_square_mean:>6.4} \n")
 
-def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, mkdir=False):
+def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, simulation_type, mkdir=False):
     mode_name = ''
     for i in range(len(mode_list)):
         for j, string in enumerate(['b','h']):
@@ -50,8 +50,8 @@ def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temp
             mode_name += str(mode_list[i][j])
         if i!=len(mode_list)-1:
             mode_name+='_'
-    scratch_path = '/gauss12/home/cityu/anwenliu/scratch/loop_mc/'
-    path_state = scratch_path + f'N{num_points}_k{kpoints_max}/nu{nu}_zt{zeta}_adsc{a_dsc}_gm{gamma}/{mode_name}/T{temperature:.2f}_tau{tau_ext}'
+    scratch_path = f'/gauss12/home/cityu/anwenliu/scratch/loop/{simulation_type}/'
+    path_state = scratch_path + f'N{num_points}_k{kpoints_max}/nu{nu}_zt{zeta}_adsc{a_dsc}_gm{gamma}/{mode_name}/stress{tau_ext}/T{temperature:.2f}'
     if os.path.exists(path_state)==False and mkdir==True:
         os.makedirs(path_state)
     if mkdir==True:

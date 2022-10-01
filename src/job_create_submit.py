@@ -10,12 +10,13 @@ gamma = case['gamma']
 mode_list = case['mode_list']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
+simulation_type = case['simulation_type']
 latt_dim = (num_points, num_points)
 
-def write_file(T, path):
+def write_file(T, path, simulation_type):
     with open(f'{path}/job.sh', 'w') as f:
         f.write(f'#!/usr/bin/env bash \n'
-                f'#SBATCH --job-name="T{T:.2f}"\n'
+                f'#SBATCH --job-name="{simulation_type}_{T:.2f}"\n'
                 f'#SBATCH --partition=xlong\n'
                   f'#SBATCH --ntasks-per-core=1\n'
                   f'#SBATCH --ntasks=1\n'
@@ -29,8 +30,8 @@ def write_file(T, path):
 
 def sbatch_job(T):
     for i in range(T.shape[0]):
-        path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, mkdir=True)
-        write_file(T[i], path_state)
+        path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list,T[i], tau_ext, simulation_type, mkdir=True)
+        write_file(T[i], path_state, simulation_type)
         path = os.getcwd()
         os.chdir(path_state)
         os.system(f'sbatch job.sh')

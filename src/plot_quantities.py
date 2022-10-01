@@ -16,7 +16,7 @@ from file_handling import output_path
 from param import case
 from analysis import calc_correlation, calc_inverse_viscosity
 
-equlibrium_num_E = 50
+equlibrium_num_E = 0
 
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
@@ -50,12 +50,13 @@ gamma = case['gamma']
 mode_list = case['mode_list']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
+simulation_type = case['simulation_type']
 latt_dim = (num_points, num_points)
 delta_t = (2*len(mode_list)*num_points**2)**(-1)
 
 T = np.arange(0,2,0.2)[1:]
 T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
-T = np.arange(0,2.2,0.2)[1:] #[[0,2.5],[1,-1]]
+T = np.arange(0,2.2,0.2)[3:] #[[0,2.5],[1,-1]]
 #T = np.arange(0,0.08,0.01)[1:]
 #T = np.arange(0,0.2,0.02)[1:] #[0,-1]
 #T = np.arange(0,4,0.4)[1:]  # [[0,2.5],[1,-1]]
@@ -79,8 +80,7 @@ inverse_viscosity = []
 mobility = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
-    path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext)
-    print(T[i])
+    path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, simulation_type)
     dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:]
     step = dat[:,0]
     E = dat[:,1]
