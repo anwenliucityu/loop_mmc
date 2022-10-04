@@ -48,7 +48,7 @@ stress_kernel = read_stress_kernel_from_txt(num_points, kpoints_max, path_stress
 # compute stress field
 from compute_fields import compute_stress_field
 stress_kernel_center = stress_kernel_shift(stress_kernel, (int(np.ceil(latt_dim[0]/2-1)), int(np.ceil(latt_dim[1]/2-1)))) 
-latt_stress = compute_stress_field(latt_state, tau_ext, stress_kernel_center, a_dsc)
+latt_stress = compute_stress_field(latt_state, stress_kernel_center, a_dsc)
 
 # compute initial energy
 E_total, E_core, E_elas, E_step = \
@@ -62,4 +62,4 @@ elif simulation_type == 'kmc':
     from monte_carlo_simulator import kmc
     v = case['v']
     Q = case['Q']
-    latt_state, latt_stress = kmc(latt_state,latt_stress,latt_height,stress_kernel,a_dsc,gamma,nblist_mat,nblist_arr, temperature,tau_ext,maxiter,nu,zeta,recalc_stress_step,plot_state_step,mode_list,E_total,E_core,E_elas,E_step,dump_interval,v,Q,path_state)
+    kmc(latt_state,latt_stress,latt_height,stress_kernel,a_dsc,gamma,nblist_mat,nblist_arr, temperature,tau_ext,maxiter,nu,zeta,recalc_stress_step,plot_state_step,mode_list,E_total,E_core,E_elas,E_step,dump_interval,v,Q,path_state)

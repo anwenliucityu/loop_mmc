@@ -9,7 +9,7 @@ from file_handling import write_total_energy_wu_to_txt, write_s_z_average_to_txt
 from pathlib import Path
 import os
 
-def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None,):
+def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, phi_ext =0):
     '''metropolis and glauber monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -25,6 +25,8 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
     Path(f'{path_state}/quantities.txt').touch()
     Path(f'{path_state}/s_z.txt').touch()
     
+    W_stress = 0
+    W_free_energy = 0
     for i in range(maxiter+1):
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
@@ -33,7 +35,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         # write E_total
         if np.mod(i, write_energy) == 0:
             stress_mean = np.mean(latt_stress)
-            write_total_energy_wu_to_txt(i, E_total,E_core,E_elas,E_step, stress_mean, path_state)
+            write_total_energy_wu_to_txt(i, E_total,E_core,E_elas,E_step, W_stress, W_free_energy, stress_mean, path_state)
             s_mean = np.mean(latt_state)
             s_square_mean = np.mean(latt_state**2)
             h_mean = np.mean(latt_height)
@@ -48,7 +50,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         # recalculate stress field to eliminate accumulated error
         if np.mod(i, recalc_stress_step) == 0 and i > 0:
             print(f"Recalculate stress field at Step {i}!")
-            latt_stress = compute_stress_field(latt_state, tau_ext, stress_kernel_center, a_dsc)
+            latt_stress = compute_stress_field(latt_state, stress_kernel_center, a_dsc)
             E_core = compute_core_energy(latt_state, nblist_mat, a_dsc, nu, zeta)
             E_step = compute_step_energy(gamma, a_dsc, latt_height, nblist_mat)
             E_elas = compute_elas_energy(a_dsc, latt_state, latt_stress)
@@ -68,15 +70,17 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         core_energy_change = compute_core_energy_change(latt_state, rand_site, state_change[0], rand_site_neighbor, a_dsc, nu, zeta)
         elas_energy_change = compute_elastic_energy_change(latt_stress, rand_site, state_change[0], stress_kernel, a_dsc)
         step_energy_change = compute_step_energy_change(latt_height, state_change[1],rand_site, rand_site_neighbor, a_dsc, gamma)
-        energy_change = core_energy_change + elas_energy_change + step_energy_change
+        ext_stress_work  = -a_dsc * tau_ext * state_change[0]
+        free_energy_work = -a_dsc * phi_ext * state_change[1]
+        enthalpy_change = core_energy_change + elas_energy_change + step_energy_change + ext_stress_work + free_energy_work
 
         # accept or reject
         if simulation_type == 'mmc':
-            if energy_change >= 0:
-                if np.random.rand() >= np.exp(-energy_change / temperature):
+            if enthalpy_change >= 0:
+                if np.random.rand() >= np.exp(-enthalpy_change / temperature):
                     continue
         elif simulation_type == 'gmc':
-            if np.random.rand() >= 0.5-0.5*np.tanh(energy_change/ (2*temperature)):
+            if np.random.rand() >= 0.5-0.5*np.tanh(enthalpy_change/ (2*temperature)):
                 continue
         # accept
         latt_state[rand_site] += state_change[0]
@@ -84,19 +88,26 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         latt_height[rand_site] += state_change[1]
 
         # calc energy and w_u
-        E_total += energy_change
+        E_total += core_energy_change + elas_energy_change + step_energy_change
         E_core += core_energy_change
         E_elas += elas_energy_change
         E_step += step_energy_change
+        W_stress += ext_stress_work
+        W_free_energy += free_energy_work
 
-def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, v,Q, path_state=None):
-    '''metropolis monte carlo'''
+def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, v,Q, path_state=None, phi_ext=0):
+    '''kinetic monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
     latt_height = latt_height_init
     N = latt_state.shape[0]
-    choice_num = len(mode_list)
+    mode_num = len(mode_list)
     stress_kernel_center = stress_kernel_shift(stress_kernel, (int(np.ceil(N/2-1)), int(np.ceil(N/2-1))))
+
+    event_num = mode_num * 2 * N * N
+    event_index_1d = np.arange(0, event_num, 1, dtype=int)
+    event_index_4d = event_index_1d.reshape(mode_num, 2, N ,N)
+    pre_exp_factor = np.exp(-Q/temperature)
 
     # create a txt file for writing E_total and w_u
     os.system(f'rm {path_state}/quantities.txt')
@@ -116,7 +127,8 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
                      (X, nblist_arr[2][Y]), # I, J-1
                      (X, nblist_arr[3][Y])) # I, J+1
     time = 0
-    plot_state_step = 10000
+    W_stress = 0
+    W_free_energy = 0
     for i in range(maxiter):
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
@@ -125,7 +137,7 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
         # write E_total
         if np.mod(i, 1) == 0:
             stress_mean = np.mean(latt_stress)
-            write_total_energy_wu_to_txt(time, E_total,E_core,E_elas,E_step, stress_mean, path_state)
+            write_total_energy_wu_to_txt(time, E_total,E_core,E_elas,E_step,W_stress, W_free_energy, stress_mean, path_state)
             s_mean = np.mean(latt_state)
             s_square_mean = np.mean(latt_state**2)
             h_mean = np.mean(latt_height)
@@ -140,52 +152,65 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
         # recalculate stress field to eliminate accumulated error
         if np.mod(i, recalc_stress_step) == 0 and i > 0:
             print(f"Recalculate stress field at Step {i}!")
-            latt_stress = compute_stress_field(latt_state, tau_ext, stress_kernel_center, a_dsc)
+            latt_stress = compute_stress_field(latt_state, stress_kernel_center, a_dsc)
             E_core = compute_core_energy(latt_state, nblist_mat, a_dsc, nu, zeta)
             E_step = compute_step_energy(gamma, a_dsc, latt_height, nblist_mat)
             E_elas = compute_elas_energy(a_dsc, latt_state, latt_stress)
             E_total = E_core + E_step + E_elas
 
-        state_change = np.array(mode_list)[0]#np.array(random.choice(mode_list))
-
         # compute change in energy
-        core_energy_change0 = compute_core_energy_change(latt_state, (X,Y), state_change[0], site_neighbor, a_dsc, nu, zeta)
-        elas_energy_change0 = compute_elastic_energy_change(latt_stress, (X,Y), state_change[0], stress_kernel, a_dsc)
-        step_energy_change0 = compute_step_energy_change(latt_height, state_change[1], (X,Y), site_neighbor, a_dsc, gamma)
-        energy_change0 = core_energy_change0 + elas_energy_change0 + step_energy_change0
-
-        core_energy_change1 = compute_core_energy_change(latt_state, (X,Y), -state_change[0], site_neighbor, a_dsc, nu, zeta)
-        elas_energy_change1 = compute_elastic_energy_change(latt_stress, (X,Y), -state_change[0], stress_kernel, a_dsc)
-        step_energy_change1 = compute_step_energy_change(latt_height, -state_change[1], (X,Y), site_neighbor, a_dsc, gamma)
-        energy_change1 = core_energy_change1 + elas_energy_change1 + step_energy_change1
-
-        energy_change = np.append(energy_change0, energy_change1, axis=0)
-        core_energy_change = np.append(core_energy_change0, core_energy_change1, axis=0)
-        elas_energy_change = np.append(elas_energy_change0, elas_energy_change1, axis=0)
-        step_energy_change = np.append(step_energy_change0, step_energy_change1, axis=0)
-
-        all_frequency = v*np.exp(-(Q+energy_change/2)/temperature)
-        sum = np.sum(all_frequency)
-        pos = np.cumsum(all_frequency.reshape(-1,)).reshape(2*N,N)/sum
+        enthalpy_4darray = np.zeros(shape=(mode_num, 2, N, N))
+        core_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
+        elas_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
+        step_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
+        for j in range(mode_num):
+            mode = mode_list[j]
+            b = mode[0]
+            h = mode[1]
+            for (k,), sign in np.ndenumerate([1,-1]):
+                core_eng_4darray[j,k,:,:] = compute_core_energy_change(latt_state, (X,Y), sign*b, site_neighbor, a_dsc, nu, zeta)
+                elas_eng_4darray[j,k,:,:] = compute_elastic_energy_change(latt_stress, (X,Y), sign*b, stress_kernel, a_dsc)
+                step_eng_4darray[j,k,:,:] = compute_step_energy_change(latt_height, sign*h, (X,Y), site_neighbor, a_dsc, gamma)
+                ext_stress_work  = -a_dsc * tau_ext * sign*b
+                free_energy_work = -a_dsc * phi_ext * sign*h
+                enthalpy_4darray[j,k,:,:] = core_eng_4darray[j,k,:,:] + elas_eng_4darray[j,k,:,:] + \
+                        step_eng_4darray[j,k,:,:] + ext_stress_work + free_energy_work
+        
+        enthalpy_1darray = enthalpy_4darray.reshape(-1,)
+        
+        frequency_1darray = pre_exp_factor * np.exp(-enthalpy_1darray/(2*temperature)) 
+        frequency_sequence = np.sort(frequency_1darray)[::-1]
+        frequency_index = np.argsort(frequency_1darray)[::-1]
+        sum = np.sum(frequency_1darray)
+        event_prob = frequency_sequence/sum
         time += -1/sum * np.log(random.random())
 
         # generate a random number in [0,1)
         random_num = random.random()
-        select_i_j = tuple(np.array(np.where(random_num<=pos))[:,0])
-        if select_i_j[0] >= N:
-            state_change *= -1
-            latt_select_i_j = (select_i_j[0]-N, select_i_j[1])
-        else:
-            latt_select_i_j = select_i_j
-
+        prob = 0
+        for l in range(event_num):
+            prob += event_prob[l]
+            if random_num < prob:
+                #select_1d_index = l
+                break
+        select_1d_index = frequency_index[l]
+        select_4d_index = tuple(np.argwhere(select_1d_index==event_index_4d)[0])
+        
+        mode_index, mode_direction_index, select_i, select_j = select_4d_index
+        mode_direction = [1,-1][mode_direction_index]
+        delta_s = mode_direction*mode_list[mode_index][0]
+        delta_z = mode_direction*mode_list[mode_index][1]
         # accept
-        latt_state[latt_select_i_j] += state_change[0]
-        latt_stress += 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, latt_select_i_j)
-        latt_height[latt_select_i_j] += state_change[1]
+        latt_state[(select_i, select_j)] += delta_s
+        latt_stress += 2 * a_dsc/N  * delta_s * stress_kernel_shift(stress_kernel, (select_i, select_j))
+        latt_height[(select_i, select_j)] += delta_z
 
         # calc energy and w_u
-        E_total += energy_change[select_i_j]
-        E_core += core_energy_change[select_i_j]
-        E_elas += elas_energy_change[select_i_j]
-        E_step += step_energy_change[select_i_j]
+        E_total += enthalpy_4darray[select_4d_index]
+        E_core += core_eng_4darray[select_4d_index]
+        E_elas += elas_eng_4darray[select_4d_index]
+        E_step += step_eng_4darray[select_4d_index]
+        W_stress      += -a_dsc * tau_ext * delta_s
+        W_free_energy += -a_dsc * phi_ext * delta_z
+
 

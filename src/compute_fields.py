@@ -10,6 +10,6 @@ def compute_stress_field(latt_state, tau_ext, stress_kernel, a_dsc):
         sum += state * stress_kernel_shift(stress_kernel, ind)
     return 2 * a_dsc/N * sum + tau_ext
 '''
-def compute_stress_field(latt_state, tau_ext, stress_kernel_center, a_dsc):
+def compute_stress_field(latt_state, stress_kernel_center, a_dsc):
     N = latt_state.shape[0]
-    return 2 * a_dsc/N * scipy.signal.convolve2d(latt_state, stress_kernel_center, mode='same', boundary='wrap') + tau_ext
+    return 2 * a_dsc/N * scipy.signal.convolve2d(latt_state, stress_kernel_center, mode='same', boundary='wrap')

@@ -11,7 +11,7 @@ def compute_core_energy_change(latt_state, rand_site, state_change, rand_site_ne
 
 def compute_elastic_energy_change(latt_stress, rand_site, state_change, stress_kernel, a_dsc):
     N = latt_stress.shape[0]
-    return - 2 * a_dsc * state_change \
+    return - a_dsc * state_change \
     * (latt_stress[rand_site] + a_dsc/N * state_change * stress_kernel[0,0])
 
 def compute_step_energy_change(latt_height, state_change, rand_site, rand_site_neighbor, a_dsc, gamma):
@@ -43,5 +43,5 @@ def compute_core_energy(latt_state, nblist_mat, a_dsc, nu, zeta):
             (1-nu)*(s - s[nblist_mat[6], nblist_mat[7]])**2) )
 
 def compute_elas_energy(a_dsc, latt_state, latt_stress):
-    return -a_dsc * np.sum(latt_state * latt_stress) 
+    return -a_dsc/2 * np.sum(latt_state * latt_stress) 
 

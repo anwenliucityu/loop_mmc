@@ -53,7 +53,7 @@ for i in range(n_max):
     sum3 += lanczos_n * sin_n[i] * \
     np.cos(2*np.pi*n*ind_I_mat/num_points)
 sum3 *= np.pi / num_points
-stress_kernel = - sum1 - sum2 - sum3
+stress_kernel = -2*(sum1 + sum2 + sum3)
 
 from file_handling import write_stress_kernel_to_txt
 write_stress_kernel_to_txt(stress_kernel, num_points, kpoints_max, path_stress_kernel)
