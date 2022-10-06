@@ -129,6 +129,10 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     time = 0
     W_stress = 0
     W_free_energy = 0
+    enthalpy_4darray = np.zeros(shape=(mode_num, 2, N, N))
+    core_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
+    elas_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
+    step_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
     for i in range(maxiter):
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
@@ -159,25 +163,38 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
             E_total = E_core + E_step + E_elas
 
         # compute change in energy
-        enthalpy_4darray = np.zeros(shape=(mode_num, 2, N, N))
-        core_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
-        elas_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
-        step_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
         for j in range(mode_num):
             mode = mode_list[j]
             b = mode[0]
             h = mode[1]
             for (k,), sign in np.ndenumerate([1,-1]):
-                core_eng_4darray[j,k,:,:] = compute_core_energy_change(latt_state, (X,Y), sign*b, site_neighbor, a_dsc, nu, zeta)
+                if i == 0:
+                    # at first step, calculate core and step energy change for all events
+                    core_eng_4darray[j,k,:,:] = compute_core_energy_change(latt_state, (X,Y), sign*b, site_neighbor, a_dsc, nu, zeta)
+                    step_eng_4darray[j,k,:,:] = compute_step_energy_change(latt_height, sign*h, (X,Y), site_neighbor, a_dsc, gamma)
+                else:
+                    # after first step, update the energy change at selected site and its neighbours
+                    update_site = ((select_i, select_j),    # find this 5 sites
+                                   (nblist_arr[0][select_i], select_j), # I-1, J
+                                   (nblist_arr[1][select_i], select_j), # I+1. J
+                                   (select_i, nblist_arr[2][select_j]), # I, J-1
+                                   (select_i, nblist_arr[3][select_j])) # I, J+1
+                    for (index_i,index_j) in update_site:   # find their neighbours and calculated the energy change one by one
+                        site_neighbor_ij = ((nblist_arr[0][index_i],index_j), # I-1, J
+                                            (nblist_arr[1][index_i], index_j), # I+1. J
+                                            (index_i, nblist_arr[2][index_j]), # I, J-1
+                                            (index_i, nblist_arr[3][index_j])) # I, J+1
+                        core_eng_4darray[j,k,index_i,index_j] = compute_core_energy_change(latt_state, (index_i, index_j), sign*b, site_neighbor_ij, a_dsc, nu, zeta)
+                        step_eng_4darray[j,k,index_i,index_j] = compute_step_energy_change(latt_height, sign*h, (index_i, index_j), site_neighbor_ij, a_dsc, gamma)
+                # elastic energy is global
                 elas_eng_4darray[j,k,:,:] = compute_elastic_energy_change(latt_stress, (X,Y), sign*b, stress_kernel, a_dsc)
-                step_eng_4darray[j,k,:,:] = compute_step_energy_change(latt_height, sign*h, (X,Y), site_neighbor, a_dsc, gamma)
                 ext_stress_work  = -a_dsc * tau_ext * sign*b
                 free_energy_work = -a_dsc * phi_ext * sign*h
                 enthalpy_4darray[j,k,:,:] = core_eng_4darray[j,k,:,:] + elas_eng_4darray[j,k,:,:] + \
-                        step_eng_4darray[j,k,:,:] + ext_stress_work + free_energy_work
+                                            step_eng_4darray[j,k,:,:] + ext_stress_work + free_energy_work
+
         
         enthalpy_1darray = enthalpy_4darray.reshape(-1,)
-        
         frequency_1darray = pre_exp_factor * np.exp(-enthalpy_1darray/(2*temperature)) 
         frequency_sequence = np.sort(frequency_1darray)[::-1]
         frequency_index = np.argsort(frequency_1darray)[::-1]

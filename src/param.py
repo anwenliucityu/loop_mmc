@@ -114,8 +114,8 @@ case_N100_k400 = {
     'tau_ext'       : 0.01,#3.2,                # externally applied reduced stress
     # simulation parameters
     'maxiter'       : 10000000000,         # max number of iteration steps
-    'recalc_stress_step' : 10000000,     # recalculate stress field every this number of steps
-    'plot_state_step' : 10000000,          # plot state every this number of steps
+    'recalc_stress_step' : 1000000,     # recalculate stress field every this number of steps
+    'plot_state_step' : 1000000,          # plot state every this number of steps
     'dump_interval'   : 1e8,
     'path_stress_kernel' : './stress_kernel_origin', # directory for saving stress kernel file
     'plot_lim'     :2.5,
@@ -168,7 +168,7 @@ case_N10_k400 = {
     'gamma'         : 0.03,
     # external condition
     'temperature'   : 24,#0.0006,            # reduced temperature
-    'tau_ext'       : 0.03,#3.2,                # externally applied reduced stress
+    'tau_ext'       : 0,#0.03,                # externally applied reduced stress
     # simulation parameters
     'maxiter'       : 10000000000,         # max number of iteration steps
     'recalc_stress_step' : 10000000,     # recalculate stress field every this number of steps
