@@ -95,7 +95,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         W_stress += ext_stress_work
         W_free_energy += free_energy_work
 
-def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, v,Q, path_state=None, phi_ext=0):
+def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval,Q, path_state=None, phi_ext=0):
     '''kinetic monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -109,23 +109,26 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     event_index_4d = event_index_1d.reshape(mode_num, 2, N ,N)
     pre_exp_factor = np.exp(-Q/temperature)
 
+    write_energy = N**2
+
     # create a txt file for writing E_total and w_u
     os.system(f'rm {path_state}/quantities.txt')
     os.system(f'rm {path_state}/s_z.txt')
     Path(f'{path_state}/quantities.txt').touch()
     Path(f'{path_state}/s_z.txt').touch()
 
-    # nblist_mat, nblist_arr
+    # find neighbor fors all pixels
     site_index_x = np.linspace(0, N-1, N, endpoint=True, dtype=int)
     site_index_y = np.linspace(0, N-1, N, endpoint=True, dtype=int)
     X,Y = np.meshgrid(site_index_x, site_index_y, indexing='xy')
     X = X.T
     Y = Y.T
-
     site_neighbor = ((nblist_arr[0][X], Y), # I-1, J
                      (nblist_arr[1][X], Y), # I+1. J
                      (X, nblist_arr[2][Y]), # I, J-1
                      (X, nblist_arr[3][Y])) # I, J+1
+
+    # initialize parameters for kMC
     time = 0
     W_stress = 0
     W_free_energy = 0
@@ -133,13 +136,15 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     core_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
     elas_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
     step_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
+
+    # execute kMC  
     for i in range(maxiter):
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
             plot_state_stress(latt_height, latt_state, latt_stress, tau_ext, i, path_state)
 
-        # write E_total
-        if np.mod(i, 1) == 0:
+        # write total energy, mean and square mean every several time
+        if np.mod(i, write_energy) == 0:
             stress_mean = np.mean(latt_stress)
             write_total_energy_wu_to_txt(time, E_total,E_core,E_elas,E_step,W_stress, W_free_energy, stress_mean, path_state)
             s_mean = np.mean(latt_state)
@@ -148,7 +153,7 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
             h_square_mean = np.mean(latt_height**2)
             write_s_z_average_to_txt(time, s_mean, s_square_mean, h_mean, h_square_mean, path_state)
 
-        # write state
+        # write restart file every several steps
         if np.mod(i, dump_interval) == 0 and i != 0:
             np.savetxt(path_state+f'/s_{i}.txt', latt_state, fmt='%.1f')
             np.savetxt(path_state+f'/z_{i}.txt', latt_height, fmt='%.1f')
@@ -162,7 +167,7 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
             E_elas = compute_elas_energy(a_dsc, latt_state, latt_stress)
             E_total = E_core + E_step + E_elas
 
-        # compute change in energy
+        # compute enthalpy change for all events
         for j in range(mode_num):
             mode = mode_list[j]
             b = mode[0]
@@ -179,7 +184,8 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
                                    (nblist_arr[1][select_i], select_j), # I+1. J
                                    (select_i, nblist_arr[2][select_j]), # I, J-1
                                    (select_i, nblist_arr[3][select_j])) # I, J+1
-                    for (index_i,index_j) in update_site:   # find their neighbours and calculated the energy change one by one
+                    # find their neighbours and calculated the energy change one by one
+                    for (index_i,index_j) in update_site:
                         site_neighbor_ij = ((nblist_arr[0][index_i],index_j), # I-1, J
                                             (nblist_arr[1][index_i], index_j), # I+1. J
                                             (index_i, nblist_arr[2][index_j]), # I, J-1
@@ -192,7 +198,6 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
                 free_energy_work = -a_dsc * phi_ext * sign*h
                 enthalpy_4darray[j,k,:,:] = core_eng_4darray[j,k,:,:] + elas_eng_4darray[j,k,:,:] + \
                                             step_eng_4darray[j,k,:,:] + ext_stress_work + free_energy_work
-
         
         enthalpy_1darray = enthalpy_4darray.reshape(-1,)
         frequency_1darray = pre_exp_factor * np.exp(-enthalpy_1darray/(2*temperature)) 
@@ -217,13 +222,14 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
         mode_direction = [1,-1][mode_direction_index]
         delta_s = mode_direction*mode_list[mode_index][0]
         delta_z = mode_direction*mode_list[mode_index][1]
-        # accept
+
+        # update the state 
         latt_state[(select_i, select_j)] += delta_s
         latt_stress += 2 * a_dsc/N  * delta_s * stress_kernel_shift(stress_kernel, (select_i, select_j))
         latt_height[(select_i, select_j)] += delta_z
 
         # calc energy and w_u
-        E_total += enthalpy_4darray[select_4d_index]
+        E_total += core_eng_4darray[select_4d_index] + elas_eng_4darray[select_4d_index] + step_eng_4darray[select_4d_index]
         E_core += core_eng_4darray[select_4d_index]
         E_elas += elas_eng_4darray[select_4d_index]
         E_step += step_eng_4darray[select_4d_index]

@@ -14,9 +14,9 @@ from matplotlib.legend_handler import HandlerPathCollection, HandlerLine2D
 import matplotlib.pyplot as plt
 from file_handling import output_path
 from param import case
-from analysis import calc_correlation, calc_inverse_viscosity
+from analysis import calc_correlation, calc_inverse_viscosity, calc_msd, fit_mob
 
-equlibrium_num_E = 0
+equlibrium_num_E = 3
 
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
@@ -51,12 +51,16 @@ mode_list = case['mode_list']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
 simulation_type = case['simulation_type']
+if simulation_type == 'kmc':
+    xlab = 'time'
+else:
+    xlab = 'step'
 latt_dim = (num_points, num_points)
 delta_t = (2*len(mode_list)*num_points**2)**(-1)
 
 T = np.arange(0,2,0.2)[1:]
 T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
-T = np.arange(0,2.2,0.2)[5:] #[[0,2.5],[1,-1]]
+T = np.arange(0,2.2,0.2)[4:] #[[0,2.5],[1,-1]]
 #T = np.array([0.8,1.0])
 #T = np.arange(0,0.08,0.01)[1:]
 #T = np.arange(0,0.2,0.02)[1:] #[0,-1]
@@ -82,14 +86,14 @@ mobility = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, simulation_type)
-    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:]
+    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:1000000]
     step = dat[:,0]
     E = dat[:,1]
     E_core = dat[:,2]
     E_elas = dat[:,3]
     E_step = dat[:,4]
 
-    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:]
+    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:1000000]
     sz_step = sz_dat[:,0]
     s_mean  = sz_dat[:,1]
     s_square_mean = sz_dat[:,2]
@@ -122,6 +126,10 @@ for i in range(T.shape[0]):
     ax[1][3].plot(sz_step, z_mean, '-')
     ax[0][4].plot(sz_step, s_square_mean, '-')
     ax[1][4].plot(sz_step, z_square_mean, '-')
+
+    #fit mobility
+    mob = op.curve_fit(fit_mob, sz_step, s_mean/tau_ext)[0][0] 
+    mobility.append(mob)
     
     '''
     # calculate v-v correlation
@@ -140,26 +148,34 @@ for i in range(T.shape[0]):
     inverse_viscosity.append(integrate_vs)
     mobility.append(integrate_vz)
     '''
+    tau_array = np.linspace(0,5,10)
+    msd = calc_msd(s_mean, sz_step, tau_array)
+    ax[1,6].plot(tau_array, msd, 'o-')
+    ax[1,6].set_xlabel(r'time', fontsize=labelsize)
+    ax[1,6].set_ylabel(r'$\langle \Delta \overline{s} \rangle^2$', fontsize=labelsize)
+
+
+
 
 ax[0,5].set_xlabel(r'$n \Delta t$', fontsize=labelsize)
 ax[0,5].set_ylabel(r'$\mathrm{cor}_v$', fontsize=labelsize)
-ax[1,5].set_xlabel(r'$n \Delta t$', fontsize=labelsize)
-ax[1,5].set_ylabel(r'$\mathrm{cor}_z$', fontsize=labelsize)
+ax[1,5].set_xlabel(r'$T$', fontsize=labelsize)
+ax[1,5].set_ylabel(r'$M$', fontsize=labelsize)
 
-ax[1][0].set_xlabel('step', fontsize=labelsize)
+ax[1][0].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[1][0].set_ylabel(r'$E_\mathrm{tot}$ per pixel', fontsize=labelsize)
-ax[0][2].set_xlabel('step', fontsize=labelsize)
+ax[0][2].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[0][2].set_ylabel(r'$w_s$', fontsize=labelsize)
-ax[1][2].set_xlabel('step', fontsize=labelsize)
+ax[1][2].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[1][2].set_ylabel(r'$w_z$', fontsize=labelsize)
 
-ax[0][3].set_xlabel('step', fontsize=labelsize)
+ax[0][3].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[0][3].set_ylabel(r'$\overline{s}$', fontsize=labelsize)
-ax[1][3].set_xlabel('step', fontsize=labelsize)
+ax[1][3].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[1][3].set_ylabel(r'$\overline{z}$', fontsize=labelsize)
-ax[0][4].set_xlabel('step', fontsize=labelsize)
+ax[0][4].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[0][4].set_ylabel(r'$\overline{s^2}$', fontsize=labelsize)
-ax[1][4].set_xlabel('step', fontsize=labelsize)
+ax[1][4].set_xlabel(f'{xlab}', fontsize=labelsize)
 ax[1][4].set_ylabel(r'$\overline{z^2}$', fontsize=labelsize)
 
 for i in range(figsize_x):
@@ -193,7 +209,7 @@ ax[0][6].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][6].set_ylabel(r'$F$ per pixel', fontsize=labelsize)
 
 #ax[1,6].plot(T, inverse_viscosity, 'o-', label = r'inverse_viscosity')
-#ax[1,6].plot(T, mobility, 'o-', label = r'mobility')
+ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
 #ax[1,6].set_ylabel(r'$d/\eta$', fontsize = labelsize)
 #ax[1,6].set_xlabel(r'$T$', fontsize = labelsize)
 #ax[1,6].legend(fancybox=False)
