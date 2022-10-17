@@ -6,7 +6,9 @@ from param import case
 
 temperature = float(sys.argv[1])
 simulation_type = case['simulation_type']
-tau_ext = case['tau_ext']
+#tau_ext = case['tau_ext']
+tau_ext = float(sys.argv[2])
+phi_ext = float(sys.argv[3])
 nu = case['nu']
 zeta = case['zeta']
 a_dsc = case['a_dsc']
@@ -23,7 +25,8 @@ dump_interval = case['dump_interval']
 read_restart =  case['read_restart']
 
 # create a directory for saving the states generated during simulation
-path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, simulation_type, mkdir=True)
+path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, \
+                mode_list, temperature, tau_ext, phi_ext, simulation_type, mkdir=True)
 
 # build up neighborlist
 import neighborlist
@@ -54,6 +57,7 @@ latt_stress = compute_stress_field(latt_state, stress_kernel_center, a_dsc)
 E_total, E_core, E_elas, E_step = \
         initialization.compute_energy(latt_state,latt_height,latt_stress,nblist_mat,a_dsc,nu,zeta,gamma)
 
+
 # monte carlo
 if simulation_type == 'mmc' or simulation_type == 'gmc':
     from monte_carlo_simulator import mc
@@ -61,4 +65,4 @@ if simulation_type == 'mmc' or simulation_type == 'gmc':
 elif simulation_type == 'kmc':
     from monte_carlo_simulator import kmc
     Q = case['Q']
-    kmc(latt_state,latt_stress,latt_height,stress_kernel,a_dsc,gamma,nblist_mat,nblist_arr, temperature,tau_ext,maxiter,nu,zeta,recalc_stress_step,plot_state_step,mode_list,E_total,E_core,E_elas,E_step,dump_interval,Q,path_state)
+    kmc(latt_state,latt_stress,latt_height,stress_kernel,a_dsc,gamma,nblist_mat,nblist_arr, temperature,tau_ext,phi_ext,maxiter,nu,zeta,recalc_stress_step,plot_state_step,mode_list,E_total,E_core,E_elas,E_step,dump_interval,Q,path_state)

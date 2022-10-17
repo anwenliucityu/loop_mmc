@@ -58,9 +58,15 @@ else:
 latt_dim = (num_points, num_points)
 delta_t = (2*len(mode_list)*num_points**2)**(-1)
 
-T = np.arange(0,2,0.2)[1:]
-T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
-T = np.arange(0,2.2,0.2)[4:] #[[0,2.5],[1,-1]]
+T = np.arange(0,2,0.2)[2:]
+#T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
+#T = np.arange(0,2.2,0.2)[3:8] #[[0,2.5],[1,-1]]
+
+#T = np.array([0.2,0.4,0.6])
+tau_ext = 0
+phi_ext = 0.2
+print(T)
+#T = np.arange(0,2.4,0.2)[4:]
 #T = np.array([0.8,1.0])
 #T = np.arange(0,0.08,0.01)[1:]
 #T = np.arange(0,0.2,0.02)[1:] #[0,-1]
@@ -85,7 +91,7 @@ inverse_viscosity = []
 mobility = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
-    path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, simulation_type)
+    path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, phi_ext, simulation_type)
     dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:1000000]
     step = dat[:,0]
     E = dat[:,1]
@@ -128,8 +134,9 @@ for i in range(T.shape[0]):
     ax[1][4].plot(sz_step, z_square_mean, '-')
 
     #fit mobility
-    mob = op.curve_fit(fit_mob, sz_step, s_mean/tau_ext)[0][0] 
-    mobility.append(mob)
+    if tau_ext!=0:
+        mob = op.curve_fit(fit_mob, sz_step, s_mean/tau_ext)[0][0] 
+        mobility.append(mob)
     
     '''
     # calculate v-v correlation
@@ -148,7 +155,7 @@ for i in range(T.shape[0]):
     inverse_viscosity.append(integrate_vs)
     mobility.append(integrate_vz)
     '''
-    tau_array = np.linspace(0,5,10)
+    tau_array = np.linspace(0,0.03,3)
     msd = calc_msd(s_mean, sz_step, tau_array)
     ax[1,6].plot(tau_array, msd, 'o-')
     ax[1,6].set_xlabel(r'time', fontsize=labelsize)
@@ -209,7 +216,10 @@ ax[0][6].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][6].set_ylabel(r'$F$ per pixel', fontsize=labelsize)
 
 #ax[1,6].plot(T, inverse_viscosity, 'o-', label = r'inverse_viscosity')
-ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
+if tau_ext!=0:
+    ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
+    print(np.array(mobility)*tau_ext)
+    ax[1,5].set_ylim(-0.02,0.22)
 #ax[1,6].set_ylabel(r'$d/\eta$', fontsize = labelsize)
 #ax[1,6].set_xlabel(r'$T$', fontsize = labelsize)
 #ax[1,6].legend(fancybox=False)
@@ -218,5 +228,6 @@ ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
 #ax[1,7].plot(1/T, np.log(mobility), 'o-')
 
 plt.tight_layout()
+#plt.savefig(f'/gauss12/home/cityu/anwenliu/figure_kmc_loop/1/{tau_ext}.png')
 plt.show()
 

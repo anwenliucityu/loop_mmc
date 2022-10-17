@@ -20,8 +20,8 @@ def plot_state_stress(latt_height, latt_state, latt_stress, tau_ext, step, path_
 
     title_list = (r"$z$",r"$s$", r"$\sigma_{13}$")
     fig, ax = plt.subplots(1,3)
-    ax[0].pcolormesh(X, Y, latt_height.T, vmax=4, vmin=-4, cmap='rainbow', linewidth=0)
-    ax[1].pcolormesh(X, Y, latt_state.T, vmax=4, vmin=-4, cmap='rainbow', linewidth=0)
+    ax[0].pcolormesh(X, Y, latt_height.T, vmax=3, vmin=-3, cmap='rainbow', linewidth=0)
+    ax[1].pcolormesh(X, Y, latt_state.T, vmax=3, vmin=-3, cmap='rainbow', linewidth=0)
     ax[2].pcolormesh(X, Y, latt_stress.T - tau_ext, vmax=1.0, vmin=-1.0, cmap='rainbow', linewidth=0)
     for i in [0,1,2]:
         ax[i].set_xlim(0, 1)

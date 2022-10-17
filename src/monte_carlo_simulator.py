@@ -95,7 +95,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         W_stress += ext_stress_work
         W_free_energy += free_energy_work
 
-def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval,Q, path_state=None, phi_ext=0):
+def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, phi_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval,Q, path_state=None,):
     '''kinetic monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init

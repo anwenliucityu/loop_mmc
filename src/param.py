@@ -47,7 +47,7 @@ case_N800_k400 = {
     'v'             : 1,
     'Q'             : 1,
     #'mode_list'     : [[0,-1]],          # np.array([p_m, q_m])  T = 0.05
-    'mode_list'     : [[0,2.5],[1,-1]],   #
+    'mode_list'     : [[1,-1]],   #
     #'mode_list'     : [[1,-1]],
     'gamma'         : 0.03,
     # external condition
@@ -106,12 +106,12 @@ case_N100_k400 = {
     'Q'             : 1,
     #'mode_list'     : [[0,-1]],          # np.array([p_m, q_m])  T = 0.05
     #'mode_list'     : [[0,2.5],[1,-1]],   #
-    'mode_list'     : [[1,-1]],
+    'mode_list'     : [[0,-1]],
     #'mode_list'     : [[1,0]],
     'gamma'         : 0.03,
     # external condition
     'temperature'   : 24,#0.0006,            # reduced temperature
-    'tau_ext'       : 0.03,#0.04, new 0.03                # externally applied reduced stress
+    'tau_ext'       : 0.0,#0.04, new 0.03                # externally applied reduced stress
     # simulation parameters
     'maxiter'       : 10000000000,         # max number of iteration steps
     'recalc_stress_step' : 10000000,     # recalculate stress field every this number of steps
@@ -168,7 +168,7 @@ case_N10_k400 = {
     'gamma'         : 0.03,
     # external condition
     'temperature'   : 24,#0.0006,            # reduced temperature
-    'tau_ext'       : 0.03,#0.03,                # externally applied reduced stress
+    'tau_ext'       : 0,#0.03,                # externally applied reduced stress
     # simulation parameters
     'maxiter'       : 10000000000,         # max number of iteration steps
     'recalc_stress_step' : 10000000,     # recalculate stress field every this number of steps
@@ -180,4 +180,4 @@ case_N10_k400 = {
     'read_restart' : False,
 }
 
-case = case_N100_k400
+case = case_N800_k400
