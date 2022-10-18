@@ -16,7 +16,7 @@ latt_dim = (num_points, num_points)
 def write_file(T, path, simulation_type, tau_ext, phi_ext):
     with open(f'{path}/job.sh', 'w') as f:
         f.write(f'#!/usr/bin/env bash \n'
-                f'#SBATCH --job-name="{simulation_type}_{T:.2f}"\n'
+                f'#SBATCH --job-name="T{T:.3f}"\n'
                 f'#SBATCH --partition=xlong\n'
                   f'#SBATCH --ntasks-per-core=1\n'
                   f'#SBATCH --ntasks=1\n'
@@ -26,7 +26,7 @@ def write_file(T, path, simulation_type, tau_ext, phi_ext):
                   f'#SBATCH --cpus-per-task=1\n\n'
 
                   f'cd {os.getcwd()} \n'
-                  f'python main.py {T:.2f} {tau_ext:.2f} {phi_ext:.2f}\n')
+                  f'python main.py {T:.3f} {tau_ext:.3f} {phi_ext:.3f}\n')
 
 def sbatch_job(T, tau_ext_all, phi_ext_all):
     T = np.array(T)
@@ -47,13 +47,17 @@ def sbatch_job(T, tau_ext_all, phi_ext_all):
 
 
 if __name__ == '__main__':
-    T = np.arange(0., 2.0, 0.2)[2:]
+    #T = np.arange(0., 2.0, 0.2)[2:]
+    #T = np.arange(0., 0.09, 0.01)[1:]
+    #T =  np.arange(0.01, 0.105, 0.005)
+    T = np.arange(0.1, 2.1, 0.1)
     tau_ext = np.array([0]) 
-    phi_ext = np.array([0.1,0.2,0.3,0.4])
+    #phi_ext = np.array([0.001,0.002,0.003,0.004])
+    phi_ext = np.array([0])
 
-    T = [1.0]
-    tau = [0]
-    phi_ext = [0]
+    #T = [1.0]
+    #tau = [0]
+    #phi_ext = [0]
     #T = np.array([0.2,0.4,0.6])
     #T = np.array([1.2, 1.4, 1.6, 1.8, 2.0])
     #T = np.arange(0, 0.08, 0.01)[1:]

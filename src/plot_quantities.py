@@ -16,7 +16,7 @@ from file_handling import output_path
 from param import case
 from analysis import calc_correlation, calc_inverse_viscosity, calc_msd, fit_mob
 
-equlibrium_num_E = 3
+equlibrium_num_E = 20
 
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
@@ -58,13 +58,14 @@ else:
 latt_dim = (num_points, num_points)
 delta_t = (2*len(mode_list)*num_points**2)**(-1)
 
-T = np.arange(0,2,0.2)[2:]
+T = np.arange(0,2,0.2)[3:]
+T = np.arange(0,0.09,0.01)[1:][-2:]
 #T = np.array([0.2,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.4,1.6,1.8])
 #T = np.arange(0,2.2,0.2)[3:8] #[[0,2.5],[1,-1]]
 
 #T = np.array([0.2,0.4,0.6])
 tau_ext = 0
-phi_ext = 0.2
+phi_ext = 0.004
 print(T)
 #T = np.arange(0,2.4,0.2)[4:]
 #T = np.array([0.8,1.0])
@@ -92,14 +93,14 @@ mobility = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, phi_ext, simulation_type)
-    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:1000000]
+    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:30]
     step = dat[:,0]
     E = dat[:,1]
     E_core = dat[:,2]
     E_elas = dat[:,3]
     E_step = dat[:,4]
 
-    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:1000000]
+    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:30]
     sz_step = sz_dat[:,0]
     s_mean  = sz_dat[:,1]
     s_square_mean = sz_dat[:,2]
@@ -128,14 +129,17 @@ for i in range(T.shape[0]):
     ax[1][0].plot(step, E/num_points**2, '-', label=f'{round(T[i],2)}')
     ax[0][2].plot(sz_step, u, '-', label=f'{round(T[i],2)}')
     ax[1][2].plot(sz_step, z, '-', label=f'{round(T[i],2)}')
-    ax[0][3].plot(sz_step, s_mean, '-')
-    ax[1][3].plot(sz_step, z_mean, '-')
+    ax[0][3].plot(sz_step, s_mean, 'o-')
+    ax[1][3].plot(sz_step, z_mean, 'o-')
     ax[0][4].plot(sz_step, s_square_mean, '-')
     ax[1][4].plot(sz_step, z_square_mean, '-')
 
     #fit mobility
     if tau_ext!=0:
         mob = op.curve_fit(fit_mob, sz_step, s_mean/tau_ext)[0][0] 
+        mobility.append(mob)
+    if phi_ext!=0:
+        mob = op.curve_fit(fit_mob, sz_step, z_mean/phi_ext)[0][0]
         mobility.append(mob)
     
     '''
@@ -220,6 +224,11 @@ if tau_ext!=0:
     ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
     print(np.array(mobility)*tau_ext)
     ax[1,5].set_ylim(-0.02,0.22)
+if phi_ext!=0:
+    ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
+    print(np.array(mobility)*phi_ext)
+    #ax[1,5].set_ylim(-0.02,0.22)
+
 #ax[1,6].set_ylabel(r'$d/\eta$', fontsize = labelsize)
 #ax[1,6].set_xlabel(r'$T$', fontsize = labelsize)
 #ax[1,6].legend(fancybox=False)

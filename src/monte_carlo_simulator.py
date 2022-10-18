@@ -9,7 +9,7 @@ from file_handling import write_total_energy_wu_to_txt, write_s_z_average_to_txt
 from pathlib import Path
 import os
 
-def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, phi_ext =0):
+def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, psi_ext =0):
     '''metropolis and glauber monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -71,7 +71,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         elas_energy_change = compute_elastic_energy_change(latt_stress, rand_site, state_change[0], stress_kernel, a_dsc)
         step_energy_change = compute_step_energy_change(latt_height, state_change[1],rand_site, rand_site_neighbor, a_dsc, gamma)
         ext_stress_work  = -a_dsc * tau_ext * state_change[0]
-        free_energy_work = -a_dsc * phi_ext * state_change[1]
+        free_energy_work = -a_dsc * psi_ext * state_change[1]
         enthalpy_change = core_energy_change + elas_energy_change + step_energy_change + ext_stress_work + free_energy_work
 
         # accept or reject
@@ -95,7 +95,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         W_stress += ext_stress_work
         W_free_energy += free_energy_work
 
-def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, phi_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval,Q, path_state=None,):
+def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, psi_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval,Q, path_state=None,):
     '''kinetic monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -195,7 +195,7 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
                 # elastic energy is global
                 elas_eng_4darray[j,k,:,:] = compute_elastic_energy_change(latt_stress, (X,Y), sign*b, stress_kernel, a_dsc)
                 ext_stress_work  = -a_dsc * tau_ext * sign*b
-                free_energy_work = -a_dsc * phi_ext * sign*h
+                free_energy_work = -a_dsc * psi_ext * sign*h
                 enthalpy_4darray[j,k,:,:] = core_eng_4darray[j,k,:,:] + elas_eng_4darray[j,k,:,:] + \
                                             step_eng_4darray[j,k,:,:] + ext_stress_work + free_energy_work
         
@@ -234,6 +234,6 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
         E_elas += elas_eng_4darray[select_4d_index]
         E_step += step_eng_4darray[select_4d_index]
         W_stress      += -a_dsc * tau_ext * delta_s
-        W_free_energy += -a_dsc * phi_ext * delta_z
+        W_free_energy += -a_dsc * psi_ext * delta_z
 
 

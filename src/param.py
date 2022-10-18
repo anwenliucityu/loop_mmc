@@ -106,7 +106,7 @@ case_N100_k400 = {
     'Q'             : 1,
     #'mode_list'     : [[0,-1]],          # np.array([p_m, q_m])  T = 0.05
     #'mode_list'     : [[0,2.5],[1,-1]],   #
-    'mode_list'     : [[0,-1]],
+    'mode_list'     : [[1,0]],
     #'mode_list'     : [[1,0]],
     'gamma'         : 0.03,
     # external condition
@@ -180,4 +180,4 @@ case_N10_k400 = {
     'read_restart' : False,
 }
 
-case = case_N800_k400
+case = case_N100_k400
