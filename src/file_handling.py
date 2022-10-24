@@ -37,17 +37,17 @@ def read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel):
 def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step,W_stress, W_free_energy, stress_mean, path_state):
     with open(f'{path_state}/quantities.txt', 'a') as f:
         if type(i) == int:
-            f.write(f"{i} {E_total:>6.4f} {E_core:>6.4f} {E_elas:>6.4f} {E_step:>6.4f} {W_stress:>6.4f} {W_free_energy:>6.4f} {stress_mean:>6.4}\n")
+            f.write(f"{i} {E_total:>6.4e} {E_core:>6.4e} {E_elas:>6.4e} {E_step:>6.4e} {W_stress:>6.4e} {W_free_energy:>6.4e} {stress_mean:>6.4e}\n")
         else:
-            f.write(f"{i:>6.4f} {E_total:>6.4f} {E_core:>6.4f} {E_elas:>6.4f} {E_step:>6.4f} {W_stress:>6.4f} {W_free_energy:>6.4f} {stress_mean:>6.4f}\n")
+            f.write(f"{i:>6.4e} {E_total:>6.4e} {E_core:>6.4e} {E_elas:>6.4e} {E_step:>6.4e} {W_stress:>6.4e} {W_free_energy:>6.4e} {stress_mean:>6.4e}\n")
 
 
 def write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, path_state):
     with open(f'{path_state}/s_z.txt', 'a') as f:
         if type(i)==int:
-            f.write(f"{i} {s_mean:>6.4f} {s_square_mean:>6.4f} {h_mean:>6.4f} {h_square_mean:>6.4f} \n")
+            f.write(f"{i} {s_mean:>6.4e} {s_square_mean:>6.4e} {h_mean:>6.4e} {h_square_mean:>6.4e} \n")
         else:
-            f.write(f"{i:>6.4f} {s_mean:>6.4f} {s_square_mean:>6.4f} {h_mean:>6.4f} {h_square_mean:>6.4f} \n")
+            f.write(f"{i:>6.4e} {s_mean:>6.4e} {s_square_mean:>6.4e} {h_mean:>6.4e} {h_square_mean:>6.4e} \n")
 
 def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, psi_ext, simulation_type, mkdir=False):
     mode_name = ''

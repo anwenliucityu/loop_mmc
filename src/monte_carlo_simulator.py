@@ -108,7 +108,7 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     event_index_1d = np.arange(0, event_num, 1, dtype=int)
     event_index_4d = event_index_1d.reshape(mode_num, 2, N ,N)
     pre_exp_factor = np.exp(-Q/temperature)
-
+    
     write_energy = N**2
 
     # create a txt file for writing E_total and w_u

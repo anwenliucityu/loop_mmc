@@ -21,6 +21,61 @@ def calc_correlation(quantity, write_step, delta_t, a_dsc):
         correlation.append(ave)
     return delta_step_index_array*write_step*delta_t, correlation
 
+def calc_vvcorrelation_displacement(displacement, time, delta_t):
+    N = displacement.shape[0]
+    n=20
+    delta_t_array = np.arange(0,delta_t*n,delta_t)
+    tmax = time[-2]
+
+    v_correlation = []
+    for index in range(n):
+        count = 0
+        ave = 0
+        tau = delta_t_array[index]
+        for i in range(1,N-1):
+            time0 = time[i]
+            time1 = time[i] + tau
+            if time1 > tmax:
+                break
+            v0 = calc_v0(i, displacement, time)
+            if tau == 0:
+                v1 = v0
+            else:
+                v1 = calc_v1(time1, displacement, time)
+            ave += v0*v1
+            count +=1
+        ave /= count
+        v_correlation.append(ave)
+    return delta_t_array, v_correlation
+        
+
+def calc_v0(i, displacement, time):
+    ti = time[i]
+    tm = time[i-1]
+    tp = time[i+1]
+    ui = displacement[i]
+    um = displacement[i-1]
+    up = displacement[i+1]
+    ui = ((ti-tm)*up + (tp-ti)*um)/(tp-tm)
+    vi = ((ti-tm)/(tp-ti)*(up-ui)+(tp-ti)/(ti-tm)*(ui-um))/(tp-tm)
+    return vi
+
+def calc_v1(time1, displacement, time):
+    i_m = np.where(time1>time)[0][-1]
+    if (time1-time[i_m])*2>time[i_m+1]-time[i_m]:
+        i_p = i_m+2
+    else:
+        i_m=i_m-1
+        i_p = i_m+2
+    tm = time[i_m]
+    tp = time[i_p]
+    um = displacement[i_m]
+    up = displacement[i_p]
+    ui = ((time1-tm)*up + (tp-time1)*um)/(tp-tm)
+    vi = ((time1-tm)/(tp-time1)*(up-ui)+(tp-time1)/(time1-tm)*(ui-um))/(tp-tm)
+    return vi
+
+
 def calc_inverse_viscosity(tau_array, correlation, T, num_points):
     integrate = 2*scipy.integrate.trapezoid(correlation, x=tau_array)*num_points**2/T
     return integrate

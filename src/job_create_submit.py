@@ -49,8 +49,12 @@ def sbatch_job(T, tau_ext_all, phi_ext_all):
 if __name__ == '__main__':
     #T = np.arange(0., 2.0, 0.2)[2:]
     #T = np.arange(0., 0.09, 0.01)[1:]
-    #T =  np.arange(0.01, 0.105, 0.005)
-    T = np.arange(0.1, 2.1, 0.1)
+    T =  np.arange(0.01, 0.065, 0.005)
+    T = np.arange(0.2, 3.2, 0.2)
+    T = np.arange(3.2,5.2,0.2)
+    #T = np.arange(0.2,5.2,0.2) #[1,-1] gamma=1.4
+    #T = np.arange(0,1.2,0.1)[1:]
+    #T = np.arange(1,2.5,0.1)
     tau_ext = np.array([0]) 
     #phi_ext = np.array([0.001,0.002,0.003,0.004])
     phi_ext = np.array([0])

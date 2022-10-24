@@ -14,9 +14,10 @@ from matplotlib.legend_handler import HandlerPathCollection, HandlerLine2D
 import matplotlib.pyplot as plt
 from file_handling import output_path
 from param import case
-from analysis import calc_correlation, calc_inverse_viscosity, calc_msd, fit_mob
+from analysis import calc_correlation, calc_inverse_viscosity, calc_msd, fit_mob, calc_vvcorrelation_displacement
 
-equlibrium_num_E = 20
+equlibrium_num_E = 100
+end = -1
 
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
@@ -48,6 +49,8 @@ zeta = case['zeta']
 a_dsc = case['a_dsc']
 gamma = case['gamma']
 mode_list = case['mode_list']
+b = mode_list[0][0]
+h = mode_list[0][1]
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
 simulation_type = case['simulation_type']
@@ -65,7 +68,19 @@ T = np.arange(0,0.09,0.01)[1:][-2:]
 
 #T = np.array([0.2,0.4,0.6])
 tau_ext = 0
-phi_ext = 0.004
+phi_ext = 0
+T =  np.arange(0.01, 0.065, 0.005)
+#T = np.array([0.01,0.015,0.02,0.025,0.03,0.035,0.037,0.04,0.042,0.045,0.047,0.05,0.055,0.06])
+T = np.arange(0.1, 2.5, 0.1)
+T = np.arange(0.2, 5.2, 0.2)
+T = np.arange(0,1.2,0.2)[1:]
+T = np.arange(1,2,0.2)
+T = np.arange(0.2,3.2,0.2)
+#T = np.arange(0,1,0.2)[1:]
+#T = np.array([1.9,2.0])
+#T = np.array([0.030,0.040])
+#T = np.array([0.8,1.2])
+#T = np.arange(1,2,0.2)
 print(T)
 #T = np.arange(0,2.4,0.2)[4:]
 #T = np.array([0.8,1.0])
@@ -90,17 +105,19 @@ S = 0
 delta_T =  T[1]-T[0]
 inverse_viscosity = []
 mobility = []
+K = []
+MSD = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, phi_ext, simulation_type)
-    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:30]
+    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:end]
     step = dat[:,0]
     E = dat[:,1]
     E_core = dat[:,2]
     E_elas = dat[:,3]
     E_step = dat[:,4]
 
-    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:30]
+    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:end]
     sz_step = sz_dat[:,0]
     s_mean  = sz_dat[:,1]
     s_square_mean = sz_dat[:,2]
@@ -134,6 +151,7 @@ for i in range(T.shape[0]):
     ax[0][4].plot(sz_step, s_square_mean, '-')
     ax[1][4].plot(sz_step, z_square_mean, '-')
 
+
     #fit mobility
     if tau_ext!=0:
         mob = op.curve_fit(fit_mob, sz_step, s_mean/tau_ext)[0][0] 
@@ -159,15 +177,50 @@ for i in range(T.shape[0]):
     inverse_viscosity.append(integrate_vs)
     mobility.append(integrate_vz)
     '''
-    tau_array = np.linspace(0,0.03,3)
-    msd = calc_msd(s_mean, sz_step, tau_array)
+    # calculate v-v correlation
+    #del_t_array , v_correlation = calc_vvcorrelation_displacement(s_mean, sz_step, 0.2)
+    #ax[0][5].plot(del_t_array, v_correlation, '-')
+    
+    tau_array = np.linspace(0,7,5)
+    #tau_array = np.linspace(0,15,7)
+    #tau_array = np.linspace(0,1e8,7)
+    #tau_array = np.linspace(0,5e7,7)
+    #''' # msd calculated mobility or inverse viscosity
+    print(T[i])
+    '''
+    msd_s_mean = s_mean-s_mean[0]
+    msd_z_mean = z_mean-z_mean[0]
+    msd_sz_step = sz_step-sz_step[0]
+    if b!=0:
+        del_t_array , v_correlation = calc_vvcorrelation_displacement(msd_s_mean, msd_sz_step, 0.2)
+        msd = calc_msd(msd_s_mean, msd_sz_step, tau_array)
+    else:
+        del_t_array , v_correlation = calc_vvcorrelation_displacement(msd_z_mean, msd_sz_step, 0.2)
+        msd = calc_msd(msd_z_mean, msd_sz_step, tau_array)
+
+    ax[1][5].plot(del_t_array, v_correlation, '-')
+    if i==0:
+        MSD.append(tau_array)
+    MSD.append(msd)
+    k = op.curve_fit(fit_mob, tau_array, msd)[0][0]/T[i]
+    K.append(k)
     ax[1,6].plot(tau_array, msd, 'o-')
     ax[1,6].set_xlabel(r'time', fontsize=labelsize)
-    ax[1,6].set_ylabel(r'$\langle \Delta \overline{s} \rangle^2$', fontsize=labelsize)
+    ax[1,6].set_ylabel(r'$\langle \Delta \overline{s}^2 \rangle$', fontsize=labelsize)
+    '''
+# b0h-1
+print(W_list)
+print(Z_list)
 
+'''
+if h!=0:
+    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,H_list]))
+else:
+    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,W_list,H_list]))
+np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/msd.txt', np.array(MSD))
+'''
 
-
-
+print(K)
 ax[0,5].set_xlabel(r'$n \Delta t$', fontsize=labelsize)
 ax[0,5].set_ylabel(r'$\mathrm{cor}_v$', fontsize=labelsize)
 ax[1,5].set_xlabel(r'$T$', fontsize=labelsize)
@@ -239,4 +292,5 @@ if phi_ext!=0:
 plt.tight_layout()
 #plt.savefig(f'/gauss12/home/cityu/anwenliu/figure_kmc_loop/1/{tau_ext}.png')
 plt.show()
+plt.close()
 
