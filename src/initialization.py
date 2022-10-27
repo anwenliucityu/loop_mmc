@@ -15,6 +15,18 @@ def one_state_init(latt_dim):
     return state_list[1] * np.ones(shape=latt_dim), \
            state_list[1] * np.ones(shape=latt_dim)
 
+def dipole_state_init(latt_dim, delta_over_N, mode_list):
+    if len(mode_list)!=1:
+        raise Exception("The number of the disconnection mode is larger than 1, dislocation dipole configuration cannot be created.")
+    b = mode_list[0][0]
+    h = mode_list[0][1]
+    delta = int(delta_over_N*latt_dim[0])
+    latt_state = state_list[1] * np.ones(shape=latt_dim)
+    latt_height= state_list[1] * np.ones(shape=latt_dim)
+    latt_state[:delta,:] = b
+    latt_height[:delta,:]= h
+    return latt_state, latt_height
+
 def circle_init(latt_dim):
     '''set states in a circle to 1'''
     radius = np.min(latt_dim) / 8 # in unit of cells

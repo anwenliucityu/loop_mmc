@@ -16,7 +16,8 @@ from file_handling import output_path
 from param import case
 from analysis import calc_correlation, calc_inverse_viscosity, calc_msd, fit_mob, calc_vvcorrelation_displacement
 
-equlibrium_num_E = 100
+equlibrium_num_E = np.linspace(0,2e4,21,dtype=int)[1:]#3000
+#equlibrium_num_E = 3000
 end = -1
 
 mpl.rcParams['xtick.direction'] = 'in'
@@ -71,16 +72,27 @@ tau_ext = 0
 phi_ext = 0
 T =  np.arange(0.01, 0.065, 0.005)
 #T = np.array([0.01,0.015,0.02,0.025,0.03,0.035,0.037,0.04,0.042,0.045,0.047,0.05,0.055,0.06])
-T = np.arange(0.1, 2.5, 0.1)
-T = np.arange(0.2, 5.2, 0.2)
-T = np.arange(0,1.2,0.2)[1:]
-T = np.arange(1,2,0.2)
-T = np.arange(0.2,3.2,0.2)
-#T = np.arange(0,1,0.2)[1:]
-#T = np.array([1.9,2.0])
-#T = np.array([0.030,0.040])
-#T = np.array([0.8,1.2])
+T = np.arange(1, 2.0, 0.1)
+#T = np.arange(0.2, 2.2, 0.2)
+#T = np.arange(0,1.2,0.1)[1:]
+#T = np.arange(0.2,2.4,0.2)
 #T = np.arange(1,2,0.2)
+T = np.arange(0.2,3.2,0.2)
+T = np.arange(0.2,4.2,0.2)
+T = np.arange(0.1,0.8,0.1)
+T = np.arange(0.4,2,0.2)
+T = np.arange(1,19,2)
+T = np.arange(1,10,1)
+T = np.arange(0.1,1.9,0.2)
+#T = np.arange(0.2,1.2,0.2)
+T = np.arange(4,7.1,0.1)
+T = np.arange(5,40,5)
+T = np.arange(2,20,2)
+T = np.arange(1,10,0.25)
+#T = np.arange(1,7,0.25)
+#T = np.array([1,1.5,2,2.5,3,3.25,3.5,3.75,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9])
+#T = np.arange(0.05,0.55,0.05)
+#T = np.arange(0.1,2.1,0.1)
 print(T)
 #T = np.arange(0,2.4,0.2)[4:]
 #T = np.array([0.8,1.0])
@@ -107,6 +119,7 @@ inverse_viscosity = []
 mobility = []
 K = []
 MSD = []
+equlibrium_num_E=600
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, phi_ext, simulation_type)
@@ -213,11 +226,15 @@ print(W_list)
 print(Z_list)
 
 '''
-if h!=0:
-    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,H_list]))
+#T = np.arange(1,2,0.2)
+case = 'case3'
+if len(mode_list)>1:
+    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b1h-1_b0h-2.5/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,  H_list, W_list]))
+elif h!=0:
+    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,H_list]))
 else:
-    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,W_list,H_list]))
-np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/msd.txt', np.array(MSD))
+    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,W_list,H_list]))
+#np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/msd.txt', np.array(MSD))
 '''
 
 print(K)

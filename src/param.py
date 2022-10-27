@@ -90,17 +90,18 @@ case_N400_k400 = {
 
 case_N100_k400 = {
     'simulation_type': simulations[1],
+    'disl_dipole'   : [True,False][0],
     # numerical parameter
     'num_points'    : 100,              # number of points along two axes
     'kpoints_max'   : 400,              # maximum k in truncated summation
     # material property
     'nu'            : 0.3,              # Poisson's ratio
-    'zeta'          : 0.1,                # weight of dislocation core energy
+    'zeta'          : 0.1,         # weight of dislocation core energy
     'a_dsc'         : 1,
     'v'             : 1, 
     'Q'             : 1,
-    'mode_list'     : [[1,-1],[0,-2.5]],          # np.array([p_m, q_m])  T = 0.05
-    'gamma'         : 0.2,#1.40,
+    'mode_list'     : [[1,-1]],          # np.array([p_m, q_m])  T = 0.05
+    'gamma'         : 0.1,#1.40,
     # external condition
     'temperature'   : 24,#0.0006,            # reduced temperature
     'tau_ext'       : 0.0,#0.04, new               # externally applied reduced stress

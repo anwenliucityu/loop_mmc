@@ -9,7 +9,7 @@ from file_handling import write_total_energy_wu_to_txt, write_s_z_average_to_txt
 from pathlib import Path
 import os
 
-def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, psi_ext =0):
+def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, psi_ext =0, disl_dipole=False, delta_over_N=0):
     '''metropolis and glauber monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -18,7 +18,12 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
     write_energy = N**2
     choice_num = len(mode_list)
     stress_kernel_center = stress_kernel_shift(stress_kernel, (int(np.ceil(N/2-1)), int(np.ceil(N/2-1))))
-    
+
+    # init paramters for dipole calculation
+    delta = int(delta_over_N*N)
+    disl_neighbor_site        = [0,   N-1, delta-1,   delta]
+    site_2_disl_neighbor_site = [N-1,   0,   delta, delta-1]
+
     # create a txt file for writing E_total and w_u
     os.system(f'rm {path_state}/quantities.txt')
     os.system(f'rm {path_state}/s_z.txt')
@@ -56,15 +61,17 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
             E_elas = compute_elas_energy(a_dsc, latt_state, latt_stress)
             E_total = E_core + E_step + E_elas
 
-        # nblist_mat, nblist_arr
+        # randomly pick up one event
+        state_change = np.random.choice([-1, 1])*np.array(random.choice(mode_list))
+
+        # randomly pick up one site
         rand_site = (np.random.randint(N), np.random.randint(N))
 
+        # find the neighbour of the random site
         rand_site_neighbor = ((nblist_arr[0][rand_site[0]], rand_site[1]), # I-1, J
                               (nblist_arr[1][rand_site[0]], rand_site[1]), # I+1. J
                               (rand_site[0], nblist_arr[2][rand_site[1]]), # I, J-1
                               (rand_site[0], nblist_arr[3][rand_site[1]])) # I, J+1
-
-        state_change = np.random.choice([-1, 1])*np.array(random.choice(mode_list))
 
         # compute change in energy
         core_energy_change = compute_core_energy_change(latt_state, rand_site, state_change[0], rand_site_neighbor, a_dsc, nu, zeta)
@@ -72,6 +79,23 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         step_energy_change = compute_step_energy_change(latt_height, state_change[1],rand_site, rand_site_neighbor, a_dsc, gamma)
         ext_stress_work  = -a_dsc * tau_ext * state_change[0]
         free_energy_work = -a_dsc * psi_ext * state_change[1]
+
+        # in dipole simulation, determine if the random site locates to the dislocation line
+        if disl_dipole==True and rand_site[0] in disl_neighbor_site:
+            index = disl_neighbor_site.index(rand_site[0])
+            new_site = (site_2_disl_neighbor_site[index], rand_site[1])
+            new_site_neighbor = ((nblist_arr[0][new_site[0]], new_site[1]), # I-1, J
+                                 (nblist_arr[1][new_site[0]], new_site[1]), # I+1. J
+                                 (new_site[0], nblist_arr[2][new_site[1]]), # I, J-1
+                                 (new_site[0], nblist_arr[3][new_site[1]])) # I, J+1
+            # compute change in energy of the image
+            core_energy_change += compute_core_energy_change(latt_state, new_site, state_change[0], new_site_neighbor, a_dsc, nu, zeta)
+            elas_energy_change += compute_elastic_energy_change(latt_stress, new_site, state_change[0], stress_kernel, a_dsc)
+            step_energy_change += compute_step_energy_change(latt_height, state_change[1], new_site, new_site_neighbor, a_dsc, gamma)
+            ext_stress_work  += -a_dsc * tau_ext * state_change[0]
+            free_energy_work += -a_dsc * psi_ext * state_change[1]
+        
+        # sum up all energy
         enthalpy_change = core_energy_change + elas_energy_change + step_energy_change + ext_stress_work + free_energy_work
 
         # accept or reject
@@ -86,6 +110,11 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         latt_state[rand_site] += state_change[0]
         latt_stress += 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, rand_site)
         latt_height[rand_site] += state_change[1]
+
+        if disl_dipole==True and rand_site[0] in disl_neighbor_site:
+            latt_state[new_site] += state_change[0]
+            latt_stress += 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, new_site)
+            latt_height[new_site] += state_change[1]
 
         # calc energy and w_u
         E_total += core_energy_change + elas_energy_change + step_energy_change
