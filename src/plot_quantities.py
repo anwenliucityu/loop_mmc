@@ -89,6 +89,8 @@ T = np.arange(4,7.1,0.1)
 T = np.arange(5,40,5)
 T = np.arange(2,20,2)
 T = np.arange(1,10,0.25)
+T = np.arange(0.1,2.1,0.1)
+T = np.arange(1,20,2)
 #T = np.arange(1,7,0.25)
 #T = np.array([1,1.5,2,2.5,3,3.25,3.5,3.75,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9])
 #T = np.arange(0.05,0.55,0.05)
@@ -225,17 +227,17 @@ for i in range(T.shape[0]):
 print(W_list)
 print(Z_list)
 
-'''
+#'''
 #T = np.arange(1,2,0.2)
-case = 'case3'
+case = 'case4'
 if len(mode_list)>1:
-    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b1h-1_b0h-2.5/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,  H_list, W_list]))
+    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b1h-1_b0h-5/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,  H_list, W_list]))
 elif h!=0:
     np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,H_list]))
 else:
     np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,W_list,H_list]))
 #np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/msd.txt', np.array(MSD))
-'''
+#'''
 
 print(K)
 ax[0,5].set_xlabel(r'$n \Delta t$', fontsize=labelsize)

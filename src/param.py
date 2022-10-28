@@ -90,7 +90,7 @@ case_N400_k400 = {
 
 case_N100_k400 = {
     'simulation_type': simulations[1],
-    'disl_dipole'   : [True,False][0],
+    'disl_dipole'   : [[True,False][1],['screen','non-screen'][1]],
     # numerical parameter
     'num_points'    : 100,              # number of points along two axes
     'kpoints_max'   : 400,              # maximum k in truncated summation

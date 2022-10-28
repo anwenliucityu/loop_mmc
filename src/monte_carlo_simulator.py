@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import random
 from stress_kernel_shift import stress_kernel_shift
 from compute_quantities import compute_core_energy_change, compute_elastic_energy_change, compute_step_energy_change, \
@@ -9,7 +10,7 @@ from file_handling import write_total_energy_wu_to_txt, write_s_z_average_to_txt
 from pathlib import Path
 import os
 
-def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, psi_ext =0, disl_dipole=False, delta_over_N=0):
+def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list,E_total, E_core,E_elas,E_step, dump_interval, simulation_type, path_state=None, psi_ext =0, disl_dipole=False, delta_over_N=0, screen='screen'):
     '''metropolis and glauber monte carlo'''
     latt_state = latt_state_init
     latt_stress = latt_stress_init
@@ -82,21 +83,30 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
 
         # in dipole simulation, determine if the random site locates to the dislocation line
         if disl_dipole==True and rand_site[0] in disl_neighbor_site:
+            # update stress field, s and z for next determined mc simulation
+            latt_state_update = copy.deepcopy(latt_state);  latt_state_update[rand_site] += state_change[0]
+            latt_height_update= copy.deepcopy(latt_height); latt_height_update[rand_site]+= state_change[1]
+            latt_stress_update=latt_stress + 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, rand_site)
+
+            # find neighbour for the determined site.
             index = disl_neighbor_site.index(rand_site[0])
             new_site = (site_2_disl_neighbor_site[index], rand_site[1])
             new_site_neighbor = ((nblist_arr[0][new_site[0]], new_site[1]), # I-1, J
                                  (nblist_arr[1][new_site[0]], new_site[1]), # I+1. J
                                  (new_site[0], nblist_arr[2][new_site[1]]), # I, J-1
                                  (new_site[0], nblist_arr[3][new_site[1]])) # I, J+1
-            # compute change in energy of the image
-            core_energy_change += compute_core_energy_change(latt_state, new_site, state_change[0], new_site_neighbor, a_dsc, nu, zeta)
-            elas_energy_change += compute_elastic_energy_change(latt_stress, new_site, state_change[0], stress_kernel, a_dsc)
-            step_energy_change += compute_step_energy_change(latt_height, state_change[1], new_site, new_site_neighbor, a_dsc, gamma)
+            # compute change in energy of the determined site.
+            core_energy_change += compute_core_energy_change(latt_state_update, new_site, state_change[0], new_site_neighbor, a_dsc, nu, zeta)
+            elas_energy_change += compute_elastic_energy_change(latt_stress_update, new_site, state_change[0], stress_kernel, a_dsc)
+            step_energy_change += compute_step_energy_change(latt_height_update, state_change[1], new_site, new_site_neighbor, a_dsc, gamma)
             ext_stress_work  += -a_dsc * tau_ext * state_change[0]
             free_energy_work += -a_dsc * psi_ext * state_change[1]
         
         # sum up all energy
-        enthalpy_change = core_energy_change + elas_energy_change + step_energy_change + ext_stress_work + free_energy_work
+        if disl_dipole==False or screen=='screen':
+            enthalpy_change = core_energy_change + elas_energy_change + step_energy_change + ext_stress_work + free_energy_work
+        elif screen=='non-screen':
+            enthalpy_change = core_energy_change + step_energy_change + ext_stress_work + free_energy_work
 
         # accept or reject
         if simulation_type == 'mmc':

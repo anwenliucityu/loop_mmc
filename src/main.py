@@ -5,8 +5,10 @@ import sys
 from param import case
 
 temperature = float(sys.argv[1])
+delta_over_N = 0
 simulation_type = case['simulation_type']
-disl_dipole = case['disl_dipole']
+disl_dipole = case['disl_dipole'][0]
+screen = case['disl_dipole'][1]
 tau_ext = float(sys.argv[2])
 psi_ext = float(sys.argv[3])
 nu = case['nu']
@@ -25,14 +27,14 @@ dump_interval = case['dump_interval']
 read_restart =  case['read_restart']
 
 # create a directory for saving the states generated during simulation
-if disl_dipole==False:
+if disl_dipole ==False:
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, \
                 mode_list, temperature, tau_ext, psi_ext, simulation_type, mkdir=True)
 else:
     delta_over_N = float(sys.argv[4])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, \
                 mode_list, temperature, tau_ext, psi_ext, simulation_type, mkdir=True, \
-                disl_dipole=True, delta_over_N=delta_over_N)
+                disl_dipole=disl_dipole, delta_over_N=delta_over_N, screen=screen)
 
 # build up neighborlist
 import neighborlist
@@ -71,7 +73,7 @@ E_total, E_core, E_elas, E_step = \
 # monte carlo
 if simulation_type == 'mmc' or simulation_type == 'gmc':
     from monte_carlo_simulator import mc
-    mc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, simulation_type, path_state, disl_dipole=disl_dipole, delta_over_N=delta_over_N)
+    mc(latt_state, latt_stress, latt_height, stress_kernel, a_dsc, gamma, nblist_mat, nblist_arr, temperature, tau_ext, maxiter, nu, zeta, recalc_stress_step, plot_state_step, mode_list, E_total, E_core, E_elas, E_step, dump_interval, simulation_type, path_state, disl_dipole=disl_dipole, delta_over_N=delta_over_N,screen=screen)
 elif simulation_type == 'kmc':
     from monte_carlo_simulator import kmc
     Q = case['Q']

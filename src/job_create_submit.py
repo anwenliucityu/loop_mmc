@@ -11,7 +11,8 @@ mode_list = case['mode_list']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
 simulation_type = case['simulation_type']
-disl_dipole = case['disl_dipole']
+disl_dipole = case['disl_dipole'][0]
+screen = case['disl_dipole'][1]
 latt_dim = (num_points, num_points)
 
 def write_file(T, path, simulation_type, tau_ext, phi_ext,disl_dipole=False,delta_over_N=0.1):
@@ -32,7 +33,7 @@ def write_file(T, path, simulation_type, tau_ext, phi_ext,disl_dipole=False,delt
         else:
             f.write(f'python main.py {T:.3f} {tau_ext:.3f} {phi_ext:.3f} {delta_over_N}\n')
 
-def sbatch_job(T, tau_ext_all, phi_ext_all,disl_dipole=False):
+def sbatch_job(T, tau_ext_all, phi_ext_all,disl_dipole=False, screen='screen'):
     T = np.array(T)
     tau_ext_all = np.array(tau_ext_all)
     phi_ext_all = np.array(phi_ext_all)
@@ -48,13 +49,13 @@ def sbatch_job(T, tau_ext_all, phi_ext_all,disl_dipole=False):
                     write_file(T[i], path_state, simulation_type, tau_ext, phi_ext)
                     path = os.getcwd()
                     os.chdir(path_state)
-                    #os.system(f'sbatch job.sh')
+                    os.system(f'sbatch job.sh')
                     os.chdir(path)
                 else:
                     for l in range(len(delta_over_N)):
                         path_state = output_path(num_points, kpoints_max, nu, \
                           zeta, a_dsc, gamma, mode_list,T[i], tau_ext, phi_ext, simulation_type, mkdir=True,\
-                          disl_dipole=True, delta_over_N = delta_over_N[l])
+                          disl_dipole=True, delta_over_N = delta_over_N[l], screen=screen)
                         write_file(T[i], path_state, simulation_type, tau_ext, phi_ext,disl_dipole=True,\
                                 delta_over_N=delta_over_N[l])
                         path = os.getcwd()
@@ -80,6 +81,7 @@ if __name__ == '__main__':
     #T = np.arange(0.05,0.55,0.05)
     #T = np.arange(0.1,1.9,0.2)
     T = np.arange(0.2,2,0.2)
+    #T = np.array([50])
     tau_ext = np.array([0]) 
     #phi_ext = np.array([0.001,0.002,0.003,0.004])
     phi_ext = np.array([0])
@@ -94,4 +96,4 @@ if __name__ == '__main__':
     #T = np.array([0.2])
     #T = np.arange(0., 0.2, 0.02)[1:]
     #T = np.arange(4, 8, 0.4)
-    sbatch_job(T, tau_ext, phi_ext, disl_dipole=disl_dipole)
+    sbatch_job(T, tau_ext, phi_ext, disl_dipole=disl_dipole, screen=screen)
