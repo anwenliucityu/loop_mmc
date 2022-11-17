@@ -90,11 +90,36 @@ T = np.arange(5,40,5)
 T = np.arange(2,20,2)
 T = np.arange(1,10,0.25)
 T = np.arange(0.1,2.1,0.1)
-T = np.arange(1,20,2)
-#T = np.arange(1,7,0.25)
-#T = np.array([1,1.5,2,2.5,3,3.25,3.5,3.75,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9])
-#T = np.arange(0.05,0.55,0.05)
-#T = np.arange(0.1,2.1,0.1)
+T = np.arange(1,9,1)
+T = np.array([0.2,0.6,1.3])
+T = np.array([0.10,0.125,0.15,0.175,0.20,0.225,0.25,0.26,0.27,0.275,0.28,0.285,0.29,0.30,0.31,0.33,0.35,0.40])
+#T = np.arange(0.1,1.7,0.1)
+#T = np.arange(0.5,5,0.25)
+T = np.array([0.1,0.2,0.25,0.27,0.29,0.3,0.31,0.33,0.35,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6])
+#T = np.array([4,5,6,7,8,8.5,8.75,9,9.5,10,11,12])
+#T = np.arange(1,9,0.25)
+#T = np.array([0.28,0.3])
+#T = np.array([0.9,1.2])
+#T = np.arange(4,8,0.5)
+#T = np.arange(1,30,3)
+T = np.arange(0.25,4.25,0.25)
+T = np.arange(4,12,1)
+T = np.arange(1,8,0.5)
+T = np.arange(0.1,1,0.1)
+T = np.arange(3,9,0.25)
+T = np.arange(0.2,0.8,0.04)
+T = np.array([0.2,0.24,0.28,0.32,0.36,0.40,0.44,0.48,0.52,0.56,0.58,0.60,0.64,0.68,0.72,0.76,0.8])
+T = np.arange(0.2,2.2,0.05)
+t1 = np.arange(0.2,0.85,0.05)
+t2 = np.arange(0.85,2.2,0.1)
+T  = np.append(t1,t2)
+T = np.arange(1,4.2,0.2)
+T = np.array([1,1.5,2,2.5,3,3.5,4,4.5]) 
+#T = np.arange(1,8,0.25)
+#T = np.arange(4,12,1)
+#T = np.arange(0.3,3.3,0.3)
+#T = np.arange(1,10,1)
+
 print(T)
 #T = np.arange(0,2.4,0.2)[4:]
 #T = np.array([0.8,1.0])
@@ -111,28 +136,29 @@ W_list = []
 Z_list = []
 labelsize=17
 titlesize=18
-#T = np.array([0.00015])
 figsize_x, figsize_y = (2,7)
 fig,ax = plt.subplots(figsize_x,figsize_y, figsize=(40,10))
 H_list = []
 S = 0
-delta_T =  T[1]-T[0]
 inverse_viscosity = []
 mobility = []
 K = []
 MSD = []
-equlibrium_num_E=600
+equlibrium_num_E=200
+E_list = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, phi_ext, simulation_type)
-    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:end]
+    dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:]
     step = dat[:,0]
     E = dat[:,1]
+    E_mean = np.mean(E)
+    E_list.append(E_mean)
     E_core = dat[:,2]
     E_elas = dat[:,3]
     E_step = dat[:,4]
 
-    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:end]
+    sz_dat = np.loadtxt(path_state+'/s_z.txt')[equlibrium_num_E:]
     sz_step = sz_dat[:,0]
     s_mean  = sz_dat[:,1]
     s_square_mean = sz_dat[:,2]
@@ -143,8 +169,10 @@ for i in range(T.shape[0]):
 
     C = (np.mean(E**2)-np.mean(E)**2)/(num_points**2*T[i]**2)
     if i==0:
+        delta_T =  T[0]
         S += C/T[i]*delta_T/2 
     else:
+        delta_T =  T[i]-T[i-1]
         S += (C_list[-1]/T[i-1]+C/T[i])*num_points**2*delta_T/2
     H_list.append((np.mean(E)-T[i]*S)/num_points**2)
     C_list.append(C)
@@ -156,6 +184,7 @@ for i in range(T.shape[0]):
     C_step.append(c_step)
     W = np.mean(u)
     W_list.append(W)
+    #z = z**2
     Z = np.mean(z)
     Z_list.append(Z)
     ax[1][0].plot(step, E/num_points**2, '-', label=f'{round(T[i],2)}')
@@ -224,18 +253,17 @@ for i in range(T.shape[0]):
     ax[1,6].set_ylabel(r'$\langle \Delta \overline{s}^2 \rangle$', fontsize=labelsize)
     '''
 # b0h-1
-print(W_list)
+#print(W_list)
 print(Z_list)
 
 #'''
 #T = np.arange(1,2,0.2)
-case = 'case4'
 if len(mode_list)>1:
-    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b1h-1_b0h-5/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,  H_list, W_list]))
+    np.savetxt(f'C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,  H_list, W_list, E_list]))
 elif h!=0:
-    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,H_list]))
+    np.savetxt(f'C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,Z_list,H_list, E_list]))
 else:
-    np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/KT_and_rough2/{case}/plot_dat/b{b}h{h}/C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,W_list,H_list]))
+    np.savetxt(f'C_Wz.txt', np.array([T,C_list,C_core,C_elas,C_step,W_list,H_list, E_list]))
 #np.savetxt(f'/gauss12/home/cityu/anwenliu/loop_stress/plot/thermodynamic_equilibrium_constant_size/plot_dat/b{b}h{h}/msd.txt', np.array(MSD))
 #'''
 
@@ -290,6 +318,11 @@ ax[0][2].legend(fancybox=False)
 ax[0,6].plot(T, np.array(H_list), 'o-')
 ax[0][6].set_xlabel(r'$T$', fontsize=labelsize)
 ax[0][6].set_ylabel(r'$F$ per pixel', fontsize=labelsize)
+
+ax[1][6].plot(T,E_list, 'o-')
+ax[1][6].set_xlabel(r'$T$', fontsize=labelsize)
+ax[1][6].set_ylabel(r'<$E_\mathrm{tot}$>', fontsize=labelsize)
+print(E_list)
 
 #ax[1,6].plot(T, inverse_viscosity, 'o-', label = r'inverse_viscosity')
 if tau_ext!=0:

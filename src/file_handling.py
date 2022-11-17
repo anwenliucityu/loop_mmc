@@ -37,17 +37,17 @@ def read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel):
 def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step,W_stress, W_free_energy, stress_mean, path_state):
     with open(f'{path_state}/quantities.txt', 'a') as f:
         if type(i) == int:
-            f.write(f"{i} {E_total:>6.4e} {E_core:>6.4e} {E_elas:>6.4e} {E_step:>6.4e} {W_stress:>6.4e} {W_free_energy:>6.4e} {stress_mean:>6.4e}\n")
+            f.write(f"{i} {E_total} {E_core} {E_elas} {E_step} {W_stress:>6.4e} {W_free_energy:>6.4e} {stress_mean:>6.4e}\n")
         else:
-            f.write(f"{i:>6.4e} {E_total:>6.4e} {E_core:>6.4e} {E_elas:>6.4e} {E_step:>6.4e} {W_stress:>6.4e} {W_free_energy:>6.4e} {stress_mean:>6.4e}\n")
+            f.write(f"{i:>6.4e} {E_total} {E_core} {E_elas} {E_step} {W_stress:>6.4e} {W_free_energy:>6.4e} {stress_mean:>6.4e}\n")
 
 
-def write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, path_state):
+def write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, w_s, w_z, path_state):
     with open(f'{path_state}/s_z.txt', 'a') as f:
         if type(i)==int:
-            f.write(f"{i} {s_mean:>6.4e} {s_square_mean:>6.4e} {h_mean:>6.4e} {h_square_mean:>6.4e} \n")
+            f.write(f"{i} {s_mean:>6.4e} {s_square_mean:>6.4e} {h_mean:>6.4e} {h_square_mean:>6.4e} {w_s} {w_z}\n")
         else:
-            f.write(f"{i:>6.4e} {s_mean:>6.4e} {s_square_mean:>6.4e} {h_mean:>6.4e} {h_square_mean:>6.4e} \n")
+            f.write(f"{i:>6.4e} {s_mean:>6.4e} {s_square_mean:>6.4e} {h_mean:>6.4e} {h_square_mean:>6.4e} {w_s} {w_z}\n")
 
 def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temperature, tau_ext, psi_ext, simulation_type, mkdir=False, disl_dipole=False, delta_over_N=0,screen='screen'):
     mode_name = ''
@@ -59,10 +59,16 @@ def output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, temp
             mode_name+='_'
     scratch_path = f'/gauss12/home/cityu/anwenliu/scratch/loop/{simulation_type}/'
     if disl_dipole==True:
-        scratch_path += f'disl_dipole/{screen}/delta_{delta_over_N}/'
+        scratch_path += f'disl_dipole/{screen}/'
+    elif tau_ext!=0:
+        scratch_path += 'stress_driven/'
+    elif psi_ext!=0:
+        scratch_path += 'free_energy_driven/'
     else:
         scratch_path += f'thermo_equilibrium/'
     path_state = scratch_path + f'N{num_points}_k{kpoints_max}/nu{nu}_zt{zeta}_adsc{a_dsc}_gm{gamma}/{mode_name}/stress{tau_ext:.3f}_psi{psi_ext:.3f}/T{temperature:.3f}'
+    if disl_dipole==True:
+        path_state += f'/delta_{delta_over_N}/'
     if os.path.exists(path_state)==False and mkdir==True:
         os.makedirs(path_state)
     #if os.path.exists(path_state)==False and mkdir==False:

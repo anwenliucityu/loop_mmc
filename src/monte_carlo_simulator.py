@@ -17,6 +17,8 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
     latt_height = latt_height_init
     N = latt_state.shape[0]
     write_energy = N**2
+    if N<100:
+        write_energy=10000
     choice_num = len(mode_list)
     stress_kernel_center = stress_kernel_shift(stress_kernel, (int(np.ceil(N/2-1)), int(np.ceil(N/2-1))))
 
@@ -33,7 +35,7 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
     
     W_stress = 0
     W_free_energy = 0
-    for i in range(maxiter+1):
+    for i in range(int(maxiter+1)):
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
             plot_state_stress(latt_height, latt_state, latt_stress, tau_ext, i, path_state)
@@ -46,7 +48,9 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
             s_square_mean = np.mean(latt_state**2)
             h_mean = np.mean(latt_height)
             h_square_mean = np.mean(latt_height**2)
-            write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, path_state)
+            w_s = s_square_mean-s_mean**2
+            w_z = h_square_mean-h_mean**2
+            write_s_z_average_to_txt(i, s_mean, s_square_mean, h_mean, h_square_mean, w_s, w_z, path_state)
 
         # write state
         if np.mod(i, dump_interval) == 0 and i != 0:
@@ -80,27 +84,6 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         step_energy_change = compute_step_energy_change(latt_height, state_change[1],rand_site, rand_site_neighbor, a_dsc, gamma)
         ext_stress_work  = -a_dsc * tau_ext * state_change[0]
         free_energy_work = -a_dsc * psi_ext * state_change[1]
-
-        # in dipole simulation, determine if the random site locates to the dislocation line
-        if disl_dipole==True and rand_site[0] in disl_neighbor_site:
-            # update stress field, s and z for next determined mc simulation
-            latt_state_update = copy.deepcopy(latt_state);  latt_state_update[rand_site] += state_change[0]
-            latt_height_update= copy.deepcopy(latt_height); latt_height_update[rand_site]+= state_change[1]
-            latt_stress_update=latt_stress + 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, rand_site)
-
-            # find neighbour for the determined site.
-            index = disl_neighbor_site.index(rand_site[0])
-            new_site = (site_2_disl_neighbor_site[index], rand_site[1])
-            new_site_neighbor = ((nblist_arr[0][new_site[0]], new_site[1]), # I-1, J
-                                 (nblist_arr[1][new_site[0]], new_site[1]), # I+1. J
-                                 (new_site[0], nblist_arr[2][new_site[1]]), # I, J-1
-                                 (new_site[0], nblist_arr[3][new_site[1]])) # I, J+1
-            # compute change in energy of the determined site.
-            core_energy_change += compute_core_energy_change(latt_state_update, new_site, state_change[0], new_site_neighbor, a_dsc, nu, zeta)
-            elas_energy_change += compute_elastic_energy_change(latt_stress_update, new_site, state_change[0], stress_kernel, a_dsc)
-            step_energy_change += compute_step_energy_change(latt_height_update, state_change[1], new_site, new_site_neighbor, a_dsc, gamma)
-            ext_stress_work  += -a_dsc * tau_ext * state_change[0]
-            free_energy_work += -a_dsc * psi_ext * state_change[1]
         
         # sum up all energy
         if disl_dipole==False or screen=='screen':
@@ -116,17 +99,39 @@ def mc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_dsc
         elif simulation_type == 'gmc':
             if np.random.rand() >= 0.5-0.5*np.tanh(enthalpy_change/ (2*temperature)):
                 continue
+
+        # add additional energy and update state for dipole.
+        # in dipole simulation, determine if the random site locates to the dislocation line
+        if disl_dipole==True and rand_site[0] in disl_neighbor_site:
+            latt_state_update = copy.deepcopy(latt_state);  latt_state_update[rand_site] += state_change[0]
+            latt_height_update= copy.deepcopy(latt_height); latt_height_update[rand_site]+= state_change[1]
+            latt_stress_update= latt_stress + 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, rand_site)
+
+            # find neighbour for the determined site.
+            index = disl_neighbor_site.index(rand_site[0])
+            new_site = (site_2_disl_neighbor_site[index], rand_site[1])
+            new_site_neighbor = ((nblist_arr[0][new_site[0]], new_site[1]), # I-1, J
+                                 (nblist_arr[1][new_site[0]], new_site[1]), # I+1. J
+                                 (new_site[0], nblist_arr[2][new_site[1]]), # I, J-1
+                                 (new_site[0], nblist_arr[3][new_site[1]])) # I, J+1
+
+            # compute change in energy of the determined site. NEW ADDED.
+            core_energy_change += compute_core_energy_change(latt_state_update, new_site, state_change[0], new_site_neighbor, a_dsc, nu, zeta)
+            elas_energy_change += compute_elastic_energy_change(latt_stress_update, new_site, state_change[0], stress_kernel, a_dsc)
+            step_energy_change += compute_step_energy_change(latt_height_update, state_change[1], new_site, new_site_neighbor, a_dsc, gamma)
+            ext_stress_work  += -a_dsc * tau_ext * state_change[0]
+            free_energy_work += -a_dsc * psi_ext * state_change[1]
+            
+            # update all information
+            latt_state[new_site] += state_change[0]
+            latt_stress += 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, new_site)
+            latt_height[new_site] += state_change[1]
+
         # accept
         latt_state[rand_site] += state_change[0]
         latt_stress += 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, rand_site)
         latt_height[rand_site] += state_change[1]
 
-        if disl_dipole==True and rand_site[0] in disl_neighbor_site:
-            latt_state[new_site] += state_change[0]
-            latt_stress += 2 * a_dsc/N  * state_change[0] * stress_kernel_shift(stress_kernel, new_site)
-            latt_height[new_site] += state_change[1]
-
-        # calc energy and w_u
         E_total += core_energy_change + elas_energy_change + step_energy_change
         E_core += core_energy_change
         E_elas += elas_energy_change
@@ -177,7 +182,7 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     step_eng_4darray = np.zeros(shape=(mode_num, 2, N, N))
 
     # execute kMC  
-    for i in range(maxiter):
+    for i in range(int(maxiter)):
         # plot state every several steps
         if np.mod(i, plot_state_step) == 0:
             plot_state_stress(latt_height, latt_state, latt_stress, tau_ext, i, path_state)
@@ -190,7 +195,9 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
             s_square_mean = np.mean(latt_state**2)
             h_mean = np.mean(latt_height)
             h_square_mean = np.mean(latt_height**2)
-            write_s_z_average_to_txt(time, s_mean, s_square_mean, h_mean, h_square_mean, path_state)
+            w_s = s_square_mean-s_mean**2
+            w_z = h_square_mean-h_mean**2
+            write_s_z_average_to_txt(time, s_mean, s_square_mean, h_mean, h_square_mean, w_s, w_z, path_state)
 
         # write restart file every several steps
         if np.mod(i, dump_interval) == 0 and i != 0:
