@@ -6,6 +6,9 @@ from param import case
 nu = case['nu']
 num_points = case['num_points']
 kpoints_max = case['kpoints_max']
+#nu = 0.3
+#num_points = 5
+#kpoints_max = 7000
 n_max = m_max = kpoints_max
 path_stress_kernel = case['path_stress_kernel']
 plot_lim = case['plot_lim']
@@ -56,7 +59,7 @@ sum3 *= np.pi / num_points
 stress_kernel = -2*(sum1 + sum2 + sum3)
 
 from file_handling import write_stress_kernel_to_txt
-write_stress_kernel_to_txt(stress_kernel, num_points, kpoints_max, path_stress_kernel)
+write_stress_kernel_to_txt(stress_kernel, num_points, kpoints_max, nu, path_stress_kernel)
 
 # plot and check
 sizeOfFont = 16

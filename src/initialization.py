@@ -25,6 +25,8 @@ def dipole_state_init(latt_dim, delta_over_N, mode_list):
     latt_height= state_list[1] * np.ones(shape=latt_dim)
     latt_state[:delta,:] = b
     latt_height[:delta,:]= h
+    #latt_state[0,:] = b; latt_state[delta-1,:] = b
+    #latt_height[0,:]= h; latt_height[delta-1,:]= h
     return latt_state, latt_height
 
 def circle_init(latt_dim):

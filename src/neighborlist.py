@@ -71,8 +71,16 @@ def generate_neighbor_index_mat(num_points):
 if __name__ == '__main__':
     a = np.arange(1,10,1).reshape(3,3)
     mat, arr = generate_neighbor_index_mat((3,3))
+    print(mat)
+    print(arr)
     print(a[mat[0], mat[1]])
     site = [0, 0]
     print(a[arr[0][site[0]], site[1]])
+    rand_site=(0,0)
+    rand_site_neighbor = ((arr[0][rand_site[0]], rand_site[1]), # I-1, J
+                              (arr[1][rand_site[0]], rand_site[1]), # I+1. J
+                              (rand_site[0], arr[2][rand_site[1]]), # I, J-1
+                              (rand_site[0], arr[3][rand_site[1]]))
+    print(rand_site_neighbor)
 
     

@@ -4,7 +4,7 @@
 #SBATCH --ntasks-per-core=1
 #SBATCH --ntasks=1
 #SBATCH --mem=5G 
-#SBATCH --exclude=gauss[6,16],gauss
+#SBATCH --exclude=gauss[1,6,16],gauss
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 

@@ -16,7 +16,7 @@ def read_stress_from_txt(component_ind, proj_plane):
     with open(f"stress_{component_ind}_{proj_plane}.txt", 'r') as file:
         return np.array([[float(num) for num in line.split(' ')] for line in file])
 
-def write_stress_kernel_to_txt(stress_kernel, num_points, kpoints_max, path_stress_kernel=None):
+def write_stress_kernel_to_txt(stress_kernel, num_points, kpoints_max, nu, path_stress_kernel=None):
     '''write stress kernel Xi to a txt file'''
     if not path_stress_kernel:
         path_stress_kernel = "./stress_kernel_origin"
@@ -24,14 +24,14 @@ def write_stress_kernel_to_txt(stress_kernel, num_points, kpoints_max, path_stre
     Path(path_stress_kernel).mkdir(parents=False, exist_ok=True)
     mat = np.matrix(stress_kernel)
     with open(path_stress_kernel + \
-    f"/stress_kernel_origin_N{num_points}_k{kpoints_max}.txt", 'w') as file:
+    f"/stress_kernel_origin_N{num_points}_k{kpoints_max}_nu{nu}.txt", 'w') as file:
         for line in mat:
             np.savetxt(file, line, fmt='%.20f')
 
-def read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel):
+def read_stress_kernel_from_txt(num_points, kpoints_max, nu, path_stress_kernel):
     '''read a stress kernel Xi numpy array from a txt file'''
     with open(path_stress_kernel + \
-    f"/stress_kernel_origin_N{num_points}_k{kpoints_max}.txt", 'r') as file:
+    f"/stress_kernel_origin_N{num_points}_k{kpoints_max}_nu{nu}.txt", 'r') as file:
         return np.array([[float(num) for num in line.split(' ')] for line in file])
 
 def write_total_energy_wu_to_txt(i, E_total,E_core, E_elas,E_step,W_stress, W_free_energy, stress_mean, path_state):

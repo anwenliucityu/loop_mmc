@@ -58,7 +58,7 @@ else:
 
 # read in stress kernel Xi
 from file_handling import read_stress_kernel_from_txt
-stress_kernel = read_stress_kernel_from_txt(num_points, kpoints_max, path_stress_kernel)
+stress_kernel = read_stress_kernel_from_txt(num_points, kpoints_max, nu, path_stress_kernel)
 
 # compute stress field
 from compute_fields import compute_stress_field

@@ -154,6 +154,8 @@ def kmc(latt_state_init, latt_stress_init, latt_height_init, stress_kernel, a_ds
     pre_exp_factor = np.exp(-Q/temperature)
     
     write_energy = N**2
+    if tau_ext!=0 or psi_ext!=0:
+        write_energy /=4
 
     # create a txt file for writing E_total and w_u
     os.system(f'rm {path_state}/quantities.txt')
