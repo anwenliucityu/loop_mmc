@@ -50,7 +50,7 @@ zeta = case['zeta']
 a_dsc = case['a_dsc']
 gamma = case['gamma']
 mode_list = case['mode_list']
-mode_list = [[1,-1]]
+#mode_list = [[0,-6]]
 b = mode_list[0][0]
 h = mode_list[0][1]
 num_points = case['num_points']
@@ -123,7 +123,6 @@ T = np.array([0.2,0.24,0.28,0.32,0.36,0.40,0.44,0.48,0.52,0.56,0.58,0.60,0.64,0.
 T = np.arange(0.1,3,0.2)
 T1 = np.arange(3,5,0.2)
 T  = np.append(T,T1)
-T = np.arange(1,6,0.25)
 T = np.arange(2,15,1)
 T = np.arange(0.2,5.2,0.2)
 T = np.arange(0.1,2,0.1)
@@ -137,7 +136,8 @@ T = np.arange(0.1,1.5,0.05)
 #T = np.arange(0.1,1.6,0.1)
 T = np.arange(1,4.2,0.2)
 #T = np.arange(1,8,0.25)
-#T = np.arange(0.4,1.9,0.1)
+T = np.arange(3,9,0.5)
+T = np.arange(1,6,0.3)
 
 print(T)
 #T = np.arange(0,2.4,0.2)[4:]
@@ -168,6 +168,8 @@ E_list = []
 Ec = []
 Eel =[]
 Es = []
+STRESS = []
+SS = []
 for i in range(T.shape[0]):
     temperature = float(T[i])
     #if i in [0,1,2,3,4,5,6]:
@@ -176,6 +178,8 @@ for i in range(T.shape[0]):
     #    equlibrium_num_E=100000
     path_state = output_path(num_points, kpoints_max, nu, zeta, a_dsc, gamma, mode_list, T[i], tau_ext, phi_ext, simulation_type)
     dat = np.loadtxt(path_state+'/quantities.txt')[equlibrium_num_E:]
+    stress = np.mean(dat[:,-1])
+    STRESS.append(stress)
     step = dat[:,0]
     E = dat[:,1]
     E_mean = np.mean(E)
@@ -192,6 +196,8 @@ for i in range(T.shape[0]):
     s_mean  = sz_dat[:,1]
     s_square_mean = sz_dat[:,2]
     z_mean  = sz_dat[:,3]
+    S_ave = np.mean(z_mean)
+    SS.append(S_ave)
     z_square_mean = sz_dat[:,4]
     u = np.sqrt(s_square_mean - s_mean**2) #(s_square_mean - s_mean**2)/T[i]#np.sqrt(s_square_mean - s_mean**2)
     z = np.sqrt(z_square_mean - z_mean**2)
@@ -367,7 +373,8 @@ if phi_ext!=0:
     ax[1,5].plot(T, mobility, 'o-', label = r'mobility')
     print(np.array(mobility)*phi_ext)
     #ax[1,5].set_ylim(-0.02,0.22)
-
+ax[0,5].plot(T,STRESS,'o-')
+ax[1,5].plot(T,SS,'o-')
 #ax[1,6].set_ylabel(r'$d/\eta$', fontsize = labelsize)
 #ax[1,6].set_xlabel(r'$T$', fontsize = labelsize)
 #ax[1,6].legend(fancybox=False)

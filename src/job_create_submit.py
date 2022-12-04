@@ -156,6 +156,8 @@ if __name__ == '__main__':
     T = np.arange(0.2,2.2,0.05)
     T = np.array([1.5,2.5])
     T = np.arange(1,6,0.3)
+    T = np.arange(0.1,2,0.2)
+    T = np.array([4.9,4.6])
     #T = np.arange(0.1,1.5,0.05)
     tau_ext = np.array([0]) 
     #psi_ext = np.array([0.02,0.04,0.06,0.08,0.10])
